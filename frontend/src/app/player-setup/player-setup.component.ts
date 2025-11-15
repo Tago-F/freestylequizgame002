@@ -3,34 +3,61 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PlayerStateService } from '../shared/player-state.service';
-import { Player } from '../shared/player.model';
+
+// Angular Material Imports
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-player-setup',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule
+  ],
   template: `
-    <div class="container">
-      <h1>プレイヤー登録</h1>
-      <div class="player-list">
-        @for (player of playerState.playerList(); track player.id) {
-          <div class="player-item">
-            <span class="player-icon">{{ player.icon }}</span>
-            <input type="text" [(ngModel)]="player.name" (ngModelChange)="updateName(player.id, $event)" placeholder="プレイヤー名">
-            <button (click)="removePlayer(player.id)" class="delete-btn">削除</button>
-          </div>
-        }
-      </div>
-
-      <div class="actions">
-        <button (click)="addPlayer()" [disabled]="playerState.playerCount() >= 16">
-          ＋ プレイヤーを追加 ({{ playerState.playerCount() }}/16)
+    <mat-card class="container">
+      <mat-card-header>
+        <mat-card-title>プレイヤー登録</mat-card-title>
+        <mat-card-subtitle>クイズに参加するプレイヤーを登録してください</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list class="player-list">
+          @for (player of playerState.playerList(); track player.id) {
+            <mat-list-item>
+              <span matListItemAvatar class="player-icon">{{ player.icon }}</span>
+              <mat-form-field matListItemLine class="player-name-field">
+                <input matInput [(ngModel)]="player.name" (ngModelChange)="updateName(player.id, $event)" placeholder="プレイヤー名">
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removePlayer(player.id)" matListItemMeta>
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-list-item>
+          }
+        </mat-list>
+      </mat-card-content>
+      <mat-card-actions class="actions">
+        <button mat-stroked-button color="primary" (click)="addPlayer()" [disabled]="playerState.playerCount() >= 16">
+          <mat-icon>add</mat-icon>
+          プレイヤーを追加 ({{ playerState.playerCount() }}/16)
         </button>
-        <a routerLink="/game-setup" class="next-link" [class.disabled]="playerState.playerCount() === 0">
+        <a mat-raised-button color="primary" routerLink="/game-setup" [disabled]="playerState.playerCount() === 0">
           設定へ進む
+          <mat-icon>arrow_forward</mat-icon>
         </a>
-      </div>
-    </div>
+      </mat-card-actions>
+    </mat-card>
   `,
   styleUrls: ['./player-setup.component.css']
 })
@@ -47,7 +74,6 @@ export class PlayerSetupComponent {
   }
 
   updateName(id: number, event: any): void {
-    // ngModelChange can sometimes pass the event object, ensure we get the value.
     const newName = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
     this.playerState.updatePlayerName(id, newName);
   }

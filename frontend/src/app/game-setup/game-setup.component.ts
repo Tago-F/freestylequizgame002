@@ -3,55 +3,70 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { QuizStateService } from '../shared/quiz-state.service';
 
+// Angular Material Imports
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-game-setup',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatCardModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatIconModule
+  ],
   template: `
-    <div class="container">
-      <h1>クイズ設定</h1>
-
-      <div class="section">
-        <h2>ジャンル:</h2>
-        <div class="button-group">
-          @for (g of quizState.genres; track g) {
-            <button
-              [class.selected]="quizState.genre() === g"
-              (click)="selectGenre(g)"
-            >
-              {{ g }}
-            </button>
-          }
+    <mat-card class="container">
+      <mat-card-header>
+        <mat-card-title>クイズ設定</mat-card-title>
+        <mat-card-subtitle>挑戦したいクイズのジャンルと難易度を選択してください</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="section">
+          <h2>ジャンル</h2>
+          <mat-button-toggle-group
+            class="button-group"
+            [value]="quizState.genre()"
+            (change)="selectGenre($event.value)">
+            @for (g of quizState.genres; track g) {
+              <mat-button-toggle [value]="g">{{ g }}</mat-button-toggle>
+            }
+          </mat-button-toggle-group>
         </div>
-      </div>
 
-      <div class="section">
-        <h2>難易度:</h2>
-        <div class="button-group">
-          @for (d of quizState.difficulties; track d) {
-            <button
-              [class.selected]="quizState.difficulty() === d"
-              (click)="selectDifficulty(d)"
-            >
-              {{ d }}
-            </button>
-          }
+        <div class="section">
+          <h2>難易度</h2>
+          <mat-button-toggle-group
+            class="button-group"
+            [value]="quizState.difficulty()"
+            (change)="selectDifficulty($event.value)">
+            @for (d of quizState.difficulties; track d) {
+              <mat-button-toggle [value]="d">{{ d }}</mat-button-toggle>
+            }
+          </mat-button-toggle-group>
         </div>
-      </div>
-
-      <div class="actions">
-        <a routerLink="/player-setup" class="back-link">
-          ← プレイヤー登録に戻る
+      </mat-card-content>
+      <mat-card-actions class="actions">
+        <a mat-button routerLink="/player-setup">
+          <mat-icon>arrow_back</mat-icon>
+          プレイヤー登録に戻る
         </a>
         <a
+          mat-raised-button
+          color="primary"
           routerLink="/quiz-play"
-          class="start-quiz-link"
-          [class.disabled]="!quizState.isQuizConfigured()"
+          [disabled]="!quizState.isQuizConfigured()"
         >
           クイズ開始
+          <mat-icon>play_arrow</mat-icon>
         </a>
-      </div>
-    </div>
+      </mat-card-actions>
+    </mat-card>
   `,
   styleUrls: ['./game-setup.component.css']
 })

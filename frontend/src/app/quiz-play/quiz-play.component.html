@@ -1,97 +1,126 @@
-<div class="container">
-  <!-- [A] Header Area -->
-  <header class="header">
-    <div class="quiz-info">
-      ジャンル: {{ quizState.genre() }} / 難易度: {{ quizState.difficulty() }}
-    </div>
-    <button (click)="resetGame()" class="reset-btn">ゲームをリセット</button>
-  </header>
+<!-- [A] Header Area -->
+<mat-toolbar color="primary" class="header">
+  <div class="quiz-info">
+    <span>ジャンル: {{ quizState.genre() }}</span>
+    <span class="separator">/</span>
+    <span>難易度: {{ quizState.difficulty() }}</span>
+  </div>
+  <span class="spacer"></span>
+  <button mat-button (click)="resetGame()">
+    <mat-icon>restart_alt</mat-icon>
+    ゲームをリセット
+  </button>
+</mat-toolbar>
 
+<div class="container">
   <!-- [B] Quiz Area -->
   <main class="quiz-area">
     @switch (viewState()) {
       @case ('loading') {
         <div class="loading-container">
-          <div class="spinner"></div>
+          <mat-progress-spinner mode="indeterminate" [diameter]="80"></mat-progress-spinner>
           <p>AIがクイズを作成中です...</p>
         </div>
       }
       @case ('quiz') {
-        <div class="quiz-container">
+        <mat-card class="quiz-card">
           @if (quizState.quiz(); as quiz) {
-            <h2 class="question">{{ quiz.question }}</h2>
-            <div class="options">
+            <mat-card-header>
+              <mat-card-title class="question">{{ quiz.question }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="options">
               @for (option of quiz.options; track option) {
-                <button class="option-btn" (click)="selectAnswer(option)">
+                <button mat-raised-button class="option-btn" (click)="selectAnswer(option)">
                   {{ option }}
                 </button>
               }
-            </div>
-            <div class="hint-section">
+            </mat-card-content>
+            <mat-card-actions class="hint-section">
               @if (quizState.hint(); as hint) {
                 <p class="hint-text"><strong>ヒント:</strong> {{ hint.hint }}</p>
               } @else {
-                <button (click)="fetchHint()" class="hint-btn">ヒントを見る</button>
-              }
-            </div>
-          }
-        </div>
-      }
-      @case ('answer') {
-        <div class="answer-container">
-          @if (quizState.quiz(); as quiz) {
-            <h2 class="question">{{ quiz.question }}</h2>
-            <div class="options">
-              @for (option of quiz.options; track option) {
-                <button
-                  class="option-btn"
-                  [class.correct]="option === quiz.correctAnswer"
-                  [class.incorrect]="option !== quiz.correctAnswer && option === selectedAnswer()"
-                  [class.selected]="option === selectedAnswer()"
-                  disabled
-                >
-                  {{ option }}
+                <button mat-stroked-button color="accent" (click)="fetchHint()">
+                  <mat-icon>lightbulb</mat-icon>
+                  ヒントを見る
                 </button>
               }
-            </div>
-            <div class="explanation">
-              <h3>
-                @if (selectedAnswer() === quiz.correctAnswer) {
-                  <span class="correct-text">正解！ 👏</span>
-                } @else {
-                  <span class="incorrect-text">不正解...</span>
-                }
-              </h3>
-              <p>{{ quiz.explanation }}</p>
-            </div>
-            <button (click)="fetchNewQuiz()" class="next-question-btn">次の問題へ</button>
+            </mat-card-actions>
           }
-        </div>
+        </mat-card>
+      }
+      @case ('answer') {
+        <mat-card class="quiz-card">
+          @if (quizState.quiz(); as quiz) {
+            <mat-card-header>
+              <mat-card-title class="question">{{ quiz.question }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="options">
+                @for (option of quiz.options; track option) {
+                  <button
+                    mat-raised-button
+                    class="option-btn"
+                    [color]="option === quiz.correctAnswer ? 'primary' : (option === selectedAnswer() ? 'warn' : undefined)"
+                    [disabled]="true"
+                  >
+                    {{ option }}
+                  </button>
+                }
+              </div>
+              <div class="explanation">
+                <h3>
+                  @if (selectedAnswer() === quiz.correctAnswer) {
+                    <span class="correct-text"><mat-icon>check_circle</mat-icon> 正解！</span>
+                  } @else {
+                    <span class="incorrect-text"><mat-icon>cancel</mat-icon> 不正解...</span>
+                  }
+                </h3>
+                <p>{{ quiz.explanation }}</p>
+              </div>
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <button mat-raised-button color="primary" (click)="fetchNewQuiz()">
+                次の問題へ <mat-icon>navigate_next</mat-icon>
+              </button>
+            </mat-card-actions>
+          }
+        </mat-card>
       }
       @case ('error') {
-        <div class="error-container">
-          <h2>エラーが発生しました</h2>
-          <p>{{ errorMessage() }}</p>
-          <button (click)="fetchNewQuiz()" class="retry-btn">再試行</button>
-        </div>
+        <mat-card class="quiz-card error-card">
+          <mat-card-header>
+            <mat-card-title>エラーが発生しました</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ errorMessage() }}</p>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-raised-button color="warn" (click)="fetchNewQuiz()">
+              <mat-icon>refresh</mat-icon> 再試行
+            </button>
+          </mat-card-actions>
+        </mat-card>
       }
     }
   </main>
-
-  <!-- [C] Player Score Area -->
-  <footer class="players-area">
-    @for (player of playerState.playerList(); track player.id) {
-      <div class="player-card">
-        <div class="player-name">
-          <span class="player-icon">{{ player.icon }}</span>
-          {{ player.name }}
-        </div>
-        <div class="score-controls">
-          <button (click)="adjustScore(player.id, -1)" class="score-btn minus">-</button>
-          <div class="player-score">{{ player.score }}</div>
-          <button (click)="adjustScore(player.id, 1)" class="score-btn plus">+</button>
-        </div>
-      </div>
-    }
-  </footer>
 </div>
+
+<!-- [C] Player Score Area -->
+<mat-toolbar class="players-area">
+  @for (player of playerState.playerList(); track player.id) {
+    <div class="player-card">
+      <span class="player-icon">{{ player.icon }}</span>
+      <span class="player-name">{{ player.name }}</span>
+      <span class="spacer"></span>
+      <div class="score-controls">
+        <button mat-icon-button (click)="adjustScore(player.id, -1)">
+          <mat-icon>remove</mat-icon>
+        </button>
+        <span class="player-score">{{ player.score }}</span>
+        <button mat-icon-button (click)="adjustScore(player.id, 1)">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</mat-toolbar>

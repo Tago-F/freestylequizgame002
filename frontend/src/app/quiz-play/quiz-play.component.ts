@@ -6,12 +6,27 @@ import { QuizStateService } from '../shared/quiz-state.service';
 import { ApiService } from '../shared/api.service';
 import { finalize } from 'rxjs';
 
+// Angular Material Imports
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+
 type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
 
 @Component({
   selector: 'app-quiz-play',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatToolbarModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatIconModule
+  ],
   templateUrl: './quiz-play.component.html',
   styleUrls: ['./quiz-play.component.css']
 })
