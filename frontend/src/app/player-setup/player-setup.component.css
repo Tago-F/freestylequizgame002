@@ -1,0 +1,118 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #343a40;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.player-icon {
+  font-size: 1.5rem;
+}
+
+input[type="text"] {
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+button, .next-link {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.next-link {
+  background-color: #28a745;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.next-link:hover {
+  background-color: #218838;
+}
+
+.next-link.disabled {
+  background-color: #6c757d;
+  pointer-events: none;
+  color: #e9ecef;
+}
