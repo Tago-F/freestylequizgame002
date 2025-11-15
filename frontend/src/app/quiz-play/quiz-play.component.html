@@ -1,0 +1,97 @@
+<div class="container">
+  <!-- [A] Header Area -->
+  <header class="header">
+    <div class="quiz-info">
+      ジャンル: {{ quizState.genre() }} / 難易度: {{ quizState.difficulty() }}
+    </div>
+    <button (click)="resetGame()" class="reset-btn">ゲームをリセット</button>
+  </header>
+
+  <!-- [B] Quiz Area -->
+  <main class="quiz-area">
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>AIがクイズを作成中です...</p>
+        </div>
+      }
+      @case ('quiz') {
+        <div class="quiz-container">
+          @if (quizState.quiz(); as quiz) {
+            <h2 class="question">{{ quiz.question }}</h2>
+            <div class="options">
+              @for (option of quiz.options; track option) {
+                <button class="option-btn" (click)="selectAnswer(option)">
+                  {{ option }}
+                </button>
+              }
+            </div>
+            <div class="hint-section">
+              @if (quizState.hint(); as hint) {
+                <p class="hint-text"><strong>ヒント:</strong> {{ hint.hint }}</p>
+              } @else {
+                <button (click)="fetchHint()" class="hint-btn">ヒントを見る</button>
+              }
+            </div>
+          }
+        </div>
+      }
+      @case ('answer') {
+        <div class="answer-container">
+          @if (quizState.quiz(); as quiz) {
+            <h2 class="question">{{ quiz.question }}</h2>
+            <div class="options">
+              @for (option of quiz.options; track option) {
+                <button
+                  class="option-btn"
+                  [class.correct]="option === quiz.correctAnswer"
+                  [class.incorrect]="option !== quiz.correctAnswer && option === selectedAnswer()"
+                  [class.selected]="option === selectedAnswer()"
+                  disabled
+                >
+                  {{ option }}
+                </button>
+              }
+            </div>
+            <div class="explanation">
+              <h3>
+                @if (selectedAnswer() === quiz.correctAnswer) {
+                  <span class="correct-text">正解！ 👏</span>
+                } @else {
+                  <span class="incorrect-text">不正解...</span>
+                }
+              </h3>
+              <p>{{ quiz.explanation }}</p>
+            </div>
+            <button (click)="fetchNewQuiz()" class="next-question-btn">次の問題へ</button>
+          }
+        </div>
+      }
+      @case ('error') {
+        <div class="error-container">
+          <h2>エラーが発生しました</h2>
+          <p>{{ errorMessage() }}</p>
+          <button (click)="fetchNewQuiz()" class="retry-btn">再試行</button>
+        </div>
+      }
+    }
+  </main>
+
+  <!-- [C] Player Score Area -->
+  <footer class="players-area">
+    @for (player of playerState.playerList(); track player.id) {
+      <div class="player-card">
+        <div class="player-name">
+          <span class="player-icon">{{ player.icon }}</span>
+          {{ player.name }}
+        </div>
+        <div class="score-controls">
+          <button (click)="adjustScore(player.id, -1)" class="score-btn minus">-</button>
+          <div class="player-score">{{ player.score }}</div>
+          <button (click)="adjustScore(player.id, 1)" class="score-btn plus">+</button>
+        </div>
+      </div>
+    }
+  </footer>
+</div>

@@ -1,18 +1,107 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { PlayerStateService } from '../shared/player-state.service';
+import { QuizStateService } from '../shared/quiz-state.service';
+import { ApiService } from '../shared/api.service';
+import { finalize } from 'rxjs';
+
+type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
 
 @Component({
   selector: 'app-quiz-play',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <h2>クイズプレイ画面</h2>
-    <p>ここはクイズプレイ画面のプレースホルダーです。</p>
-    <a routerLink="/player-setup">ゲームをリセット</a>
-  `,
-  styles: []
+  templateUrl: './quiz-play.component.html',
+  styleUrls: ['./quiz-play.component.css']
 })
-export class QuizPlayComponent {
+export class QuizPlayComponent implements OnInit {
+  viewState = signal<ViewState>('loading');
+  selectedAnswer = signal<string | null>(null);
+  errorMessage = signal<string | null>(null);
 
+  constructor(
+    public playerState: PlayerStateService,
+    public quizState: QuizStateService,
+    private apiService: ApiService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    if (!this.quizState.isQuizConfigured()) {
+      this.router.navigate(['/game-setup']);
+      return;
+    }
+    this.fetchNewQuiz();
+  }
+
+  fetchNewQuiz(): void {
+    this.viewState.set('loading');
+    this.selectedAnswer.set(null);
+    this.quizState.setCurrentHint(null);
+    const config = this.quizState.getQuizConfigRequest();
+
+    if (!config) {
+      this.handleError('クイズの設定が見つかりません。');
+      return;
+    }
+
+    this.apiService.generateQuiz(config)
+      .pipe(finalize(() => {
+        if (this.viewState() === 'loading') {
+          // Handle cases where API completes but doesn't set a state
+        }
+      }))
+      .subscribe({
+        next: (quiz) => {
+          this.quizState.setCurrentQuiz(quiz);
+          this.viewState.set('quiz');
+        },
+        error: (err) => {
+          console.error('Quiz generation failed:', err);
+          this.handleError('クイズの生成に失敗しました。AIの応答がないか、サーバーがダウンしている可能性があります。');
+        }
+      });
+  }
+
+  selectAnswer(option: string): void {
+    if (this.viewState() !== 'quiz') return;
+    this.selectedAnswer.set(option);
+    this.viewState.set('answer');
+  }
+
+  fetchHint(): void {
+    const currentQuiz = this.quizState.quiz();
+    if (!currentQuiz) return;
+
+    this.viewState.set('loading');
+    this.apiService.generateHint({
+      question: currentQuiz.question,
+      options: currentQuiz.options
+    }).subscribe({
+      next: (hint) => {
+        this.quizState.setCurrentHint(hint);
+        this.viewState.set('quiz'); // Go back to quiz view to show the hint
+      },
+      error: (err) => {
+        console.error('Hint generation failed:', err);
+        this.handleError('ヒントの生成に失敗しました。');
+      }
+    });
+  }
+
+  adjustScore(playerId: number, amount: number): void {
+    this.playerState.adjustScore(playerId, amount);
+  }
+
+  resetGame(): void {
+    this.playerState.reset();
+    this.quizState.resetQuizState();
+    this.router.navigate(['/player-setup']);
+  }
+
+  private handleError(message: string): void {
+    this.errorMessage.set(message);
+    this.viewState.set('error');
+  }
 }
