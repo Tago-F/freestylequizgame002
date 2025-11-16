@@ -6,51 +6,60 @@ import com.tagoapp.backend.dto.HintResponse;
 import com.tagoapp.backend.dto.QuizResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.stringtemplate.v4.ST;
 
-import java.util.Map;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class QuizServiceImpl implements QuizService {
 
     private final ChatClient chatClient;
-    private final PromptTemplate quizGenerationPromptTemplate;
-    private final PromptTemplate hintGenerationPromptTemplate;
+    private final String quizGenerationPromptString;
+    private final String hintGenerationPromptString;
 
     public QuizServiceImpl(ChatModel chatModel,
                            @Value("classpath:prompts/quiz-generation.st") Resource quizGenerationResource,
-                           @Value("classpath:prompts/hint-generation.st") Resource hintGenerationResource) {
+                           @Value("classpath:prompts/hint-generation.st") Resource hintGenerationResource) throws IOException {
         this.chatClient = ChatClient.create(chatModel);
-        this.quizGenerationPromptTemplate = new PromptTemplate(quizGenerationResource);
-        this.hintGenerationPromptTemplate = new PromptTemplate(hintGenerationResource);
+        this.quizGenerationPromptString = quizGenerationResource.getContentAsString(StandardCharsets.UTF_8);
+        this.hintGenerationPromptString = hintGenerationResource.getContentAsString(StandardCharsets.UTF_8);
     }
 
     @Override
     public QuizResponse generateQuiz(GenerateQuizRequest request) {
-        Map<String, Object> model = new java.util.HashMap<>();
-        model.put("genre", request.getGenre());
-        model.put("difficulty", request.getDifficulty());
+        ST st = new ST(quizGenerationPromptString);
+
+        st.add("genre", request.getGenre());
+        st.add("difficulty", request.getDifficulty());
         if (request.getPreviousQuestions() != null && !request.getPreviousQuestions().isEmpty()) {
-            model.put("previousQuestions", request.getPreviousQuestions());
+            st.add("previousQuestions", request.getPreviousQuestions());
         }
 
-        var prompt = quizGenerationPromptTemplate.create(model);
+        String renderedPrompt = st.render();
+        // デバッグ
+        System.out.println(renderedPrompt);
 
-        return chatClient.prompt(prompt)
+        return chatClient.prompt()
+                .user(renderedPrompt)
                 .call()
                 .entity(QuizResponse.class);
     }
 
     @Override
     public HintResponse generateHint(HintRequest request) {
-        var prompt = hintGenerationPromptTemplate.create(
-                Map.of("question", request.getQuestion(), "options", request.getOptions())
-        );
+        ST st = new ST(hintGenerationPromptString);
 
-        return chatClient.prompt(prompt)
+        st.add("question", request.getQuestion());
+        st.add("options", request.getOptions());
+
+        String renderedPrompt = st.render();
+
+        return chatClient.prompt()
+                .user(renderedPrompt)
                 .call()
                 .entity(HintResponse.class);
     }

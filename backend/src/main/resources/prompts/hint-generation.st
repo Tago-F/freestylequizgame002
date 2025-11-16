@@ -3,10 +3,10 @@
 
 # クイズ情報
 ## 問題
-{question}
+<question>
 
 ## 選択肢
-{options}
+<options>
 
 # 生成するヒントの形式
 ヒントは以下のJSON形式に厳密に従ってください。
