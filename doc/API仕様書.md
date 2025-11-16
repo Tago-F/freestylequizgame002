@@ -16,7 +16,7 @@
 
 - エンドポイント: POST /api/v1/quiz/generate
 
-- 説明: ユーザーが選択したジャンルと難易度に基づき、AIがクイズ一式を生成して返す。
+- 説明: ユーザーが選択したジャンルと難易度、およびオプションとして過去の出題リストに基づき、AIが重複を避けたクイズ一式を生成して返す。
 
 - リクエストボディ: GenerateQuizRequest (3.1参照)
 
@@ -47,11 +47,16 @@
 ### 3.1. GenerateQuizRequest (クイズ生成リクエスト)
 
 `POST /quiz/generate` でフロントエンドから送信するデータ。
+`previousQuestions` は、AIに重複を避けるよう指示するためのオプション項目。直近の出題履歴（問題文のリスト）を想定。
 
 ```json
 {
   "genre": "Java",
-  "difficulty": "ふつう"
+  "difficulty": "ふつう",
+  "previousQuestions": [
+    "Javaでfinalキーワードが持つ3つの主な役割は何ですか？",
+    "Javaのガベージコレクションについて説明してください。"
+  ]
 }
 ```
 
