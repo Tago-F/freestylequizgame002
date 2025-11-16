@@ -3,6 +3,11 @@
 
 テーマ: {genre}
 難易度: {difficulty}
+<if(previousQuestions)>
+
+以下のリストにある問題とは異なる、新しい問題を生成してください。
+- <previousQuestions; separator="\n- ">
+<endif>
 
 生成するクイズは、以下のJSON形式に厳密に従ってください。
 \{

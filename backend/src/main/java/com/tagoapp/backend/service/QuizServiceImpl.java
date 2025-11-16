@@ -30,9 +30,14 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizResponse generateQuiz(GenerateQuizRequest request) {
-        var prompt = quizGenerationPromptTemplate.create(
-                Map.of("genre", request.getGenre(), "difficulty", request.getDifficulty())
-        );
+        Map<String, Object> model = new java.util.HashMap<>();
+        model.put("genre", request.getGenre());
+        model.put("difficulty", request.getDifficulty());
+        if (request.getPreviousQuestions() != null && !request.getPreviousQuestions().isEmpty()) {
+            model.put("previousQuestions", request.getPreviousQuestions());
+        }
+
+        var prompt = quizGenerationPromptTemplate.create(model);
 
         return chatClient.prompt(prompt)
                 .call()
