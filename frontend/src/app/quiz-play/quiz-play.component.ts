@@ -51,6 +51,12 @@ export class QuizPlayComponent implements OnInit {
   }
 
   fetchNewQuiz(): void {
+    // In turn-based mode, advance to the next player *before* fetching a new quiz,
+    // but only if it's not the very first quiz.
+    if (this.quizState.gameMode() === 'turn' && this.quizState.history().length > 0) {
+      this.playerState.nextTurn();
+    }
+
     this.viewState.set('loading');
     this.selectedAnswer.set(null);
     this.quizState.setCurrentHint(null);
@@ -82,6 +88,16 @@ export class QuizPlayComponent implements OnInit {
   selectAnswer(option: string): void {
     if (this.viewState() !== 'quiz') return;
     this.selectedAnswer.set(option);
+
+    // In turn-based mode, automatically add score if the answer is correct
+    const quiz = this.quizState.quiz();
+    if (this.quizState.gameMode() === 'turn' && quiz && option === quiz.correctAnswer) {
+      const currentPlayer = this.playerState.currentPlayer();
+      if (currentPlayer) {
+        this.playerState.adjustScore(currentPlayer.id, 1);
+      }
+    }
+
     this.viewState.set('answer');
   }
 

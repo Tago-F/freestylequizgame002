@@ -13,6 +13,13 @@
 </mat-toolbar>
 
 <div class="container">
+  <!-- Turn Display -->
+  @if (quizState.gameMode() === 'turn' && playerState.currentPlayer(); as player) {
+    <div class="turn-display">
+      <h2>次は <span class="player-icon-small">{{ player.icon }}</span> {{ player.name }} さんの番です</h2>
+    </div>
+  }
+
   <!-- [B] Quiz Area -->
   <main class="quiz-area">
     @switch (viewState()) {
@@ -108,19 +115,27 @@
 <!-- [C] Player Score Area -->
 <mat-toolbar class="players-area">
   @for (player of playerState.playerList(); track player.id) {
-    <div class="player-card">
+    <div
+      class="player-card"
+      [class.highlight]="quizState.gameMode() === 'turn' && player.id === playerState.currentPlayer()?.id"
+    >
       <span class="player-icon">{{ player.icon }}</span>
       <span class="player-name">{{ player.name }}</span>
       <span class="spacer"></span>
-      <div class="score-controls">
-        <button mat-icon-button (click)="adjustScore(player.id, -1)">
-          <mat-icon>remove</mat-icon>
-        </button>
+
+      @if (quizState.gameMode() === 'all') {
+        <div class="score-controls">
+          <button mat-icon-button (click)="adjustScore(player.id, -1)">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="player-score">{{ player.score }}</span>
+          <button mat-icon-button (click)="adjustScore(player.id, 1)">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      } @else {
         <span class="player-score">{{ player.score }}</span>
-        <button mat-icon-button (click)="adjustScore(player.id, 1)">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
+      }
     </div>
   }
 </mat-toolbar>

@@ -1,6 +1,8 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { GenerateQuizRequest, QuizResponse, HintResponse } from './quiz.model';
 
+export type GameMode = 'all' | 'turn';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,6 +17,7 @@ export class QuizStateService {
 
   private selectedGenre = signal<string | null>(null);
   private selectedDifficulty = signal<string | null>(null);
+  private selectedGameMode = signal<GameMode>('all');
   private currentQuiz = signal<QuizResponse | null>(null);
   private currentHint = signal<HintResponse | null>(null);
   private quizHistory = signal<string[]>([]);
@@ -22,6 +25,7 @@ export class QuizStateService {
   // Public signals for components to read
   public readonly genre = this.selectedGenre.asReadonly();
   public readonly difficulty = this.selectedDifficulty.asReadonly();
+  public readonly gameMode = this.selectedGameMode.asReadonly();
   public readonly quiz = this.currentQuiz.asReadonly();
   public readonly hint = this.currentHint.asReadonly();
   public readonly history = this.quizHistory.asReadonly();
@@ -39,6 +43,10 @@ export class QuizStateService {
 
   setDifficulty(difficulty: string): void {
     this.selectedDifficulty.set(difficulty);
+  }
+
+  setGameMode(mode: GameMode): void {
+    this.selectedGameMode.set(mode);
   }
 
   setCurrentQuiz(quiz: QuizResponse | null): void {
@@ -69,6 +77,7 @@ export class QuizStateService {
   resetQuizState(): void {
     this.selectedGenre.set(null);
     this.selectedDifficulty.set(null);
+    this.selectedGameMode.set('all');
     this.currentQuiz.set(null);
     this.currentHint.set(null);
     this.quizHistory.set([]);

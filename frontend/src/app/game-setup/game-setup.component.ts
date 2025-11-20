@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { QuizStateService } from '../shared/quiz-state.service';
+import { QuizStateService, GameMode } from '../shared/quiz-state.service';
 
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
@@ -50,6 +50,17 @@ import { MatIconModule } from '@angular/material/icon';
             }
           </mat-button-toggle-group>
         </div>
+
+        <div class="section">
+          <h2>ゲームモード</h2>
+          <mat-button-toggle-group
+            class="button-group"
+            [value]="quizState.gameMode()"
+            (change)="selectGameMode($event.value)">
+            <mat-button-toggle value="all">全員回答モード</mat-button-toggle>
+            <mat-button-toggle value="turn">ターン制モード</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
       </mat-card-content>
       <mat-card-actions class="actions">
         <a mat-button routerLink="/player-setup">
@@ -79,5 +90,9 @@ export class GameSetupComponent {
 
   selectDifficulty(difficulty: string): void {
     this.quizState.setDifficulty(difficulty);
+  }
+
+  selectGameMode(mode: string): void {
+    this.quizState.setGameMode(mode as GameMode);
   }
 }
