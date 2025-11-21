@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: ''  // 本番は空文字にして、Firebase Hosting の相対パス転送を使う
+  apiUrl: 'https://my-backend-api-515310635951.asia-northeast1.run.app' 
 };
