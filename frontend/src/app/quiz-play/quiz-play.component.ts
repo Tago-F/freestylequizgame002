@@ -125,10 +125,19 @@ export class QuizPlayComponent implements OnInit {
     this.playerState.adjustScore(playerId, amount);
   }
 
+  addUser(): void {
+    this.router.navigate(['/player-setup']);
+  }
+
   resetGame(): void {
     this.playerState.reset();
     this.quizState.resetQuizState();
     this.router.navigate(['/player-setup']);
+  }
+
+  backToSettings(): void {
+    this.quizState.resetQuizState();
+    this.router.navigate(['/game-setup']);
   }
 
   private handleError(message: string): void {

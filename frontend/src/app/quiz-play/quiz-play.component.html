@@ -6,6 +6,14 @@
     <span>難易度: {{ quizState.difficulty() }}</span>
   </div>
   <span class="spacer"></span>
+  <button mat-button (click)="addUser()">
+    <mat-icon>person_add</mat-icon>
+    ユーザーを追加する
+  </button>
+  <button mat-button (click)="backToSettings()">
+    <mat-icon>settings</mat-icon>
+    設定に戻る
+  </button>
   <button mat-button (click)="resetGame()">
     <mat-icon>restart_alt</mat-icon>
     ゲームをリセット
