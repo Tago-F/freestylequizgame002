@@ -17,7 +17,7 @@ yarn-error.log*
 *.cache
 
 # firebase
-*firebase*
+# *firebase*
 
 # tmp & memo
 tmp*
