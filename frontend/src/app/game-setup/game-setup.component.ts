@@ -30,11 +30,18 @@ import { MatIconModule } from '@angular/material/icon';
         <div class="section">
           <h2>ジャンル</h2>
           <mat-button-toggle-group
-            class="button-group"
+            class="button-group-vertical"
             [value]="quizState.genre()"
             (change)="selectGenre($event.value)">
-            @for (g of quizState.genres; track g) {
-              <mat-button-toggle [value]="g">{{ g }}</mat-button-toggle>
+            @for (category of quizState.genreCategories; track category.name) {
+              <div>
+                <h3 class="category-title">{{ category.name }}</h3>
+                <div class="button-row">
+                  @for (g of category.genres; track g) {
+                    <mat-button-toggle [value]="g">{{ g }}</mat-button-toggle>
+                  }
+                </div>
+              </div>
             }
           </mat-button-toggle-group>
         </div>

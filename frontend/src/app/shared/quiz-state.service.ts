@@ -3,14 +3,28 @@ import { GenerateQuizRequest, QuizResponse, HintResponse } from './quiz.model';
 
 export type GameMode = 'all' | 'turn';
 
+export interface GenreCategory {
+  name: string;
+  genres: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class QuizStateService {
-  public readonly genres = [
-    '歴史', '化学', '地理', '映画', 'アニメ',
-    'プログラミングの概念', 'Java', 'C#', 'Python', 'SQL',
-    'ランダム'
+  public readonly genreCategories: GenreCategory[] = [
+    {
+      name: '一般ジャンル',
+      genres: ['歴史', '化学', '地理', '映画', 'アニメ']
+    },
+    {
+      name: 'ITスキル',
+      genres: ['プログラミング', 'Java', 'C#', 'Python', 'SQL']
+    },
+    {
+      name: 'ランダム',
+      genres: ['ランダム']
+    }
   ];
 
   public readonly difficulties = ['かんたん', 'ふつう', 'むずかしい'];
