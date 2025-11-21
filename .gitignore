@@ -21,3 +21,4 @@ yarn-error.log*
 
 # tmp & memo
 tmp*
+deploy_command
