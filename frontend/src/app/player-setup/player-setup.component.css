@@ -38,9 +38,14 @@ mat-card-title {
 
 .actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem 1rem;
+  justify-content: flex-end; /* Align items to the right */
+  gap: 8px; /* Add some space between buttons */
+  padding: 16px;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.spacer {
+  flex: 1 1 auto;
 }
 
 /* Override default Angular Material padding to make it cleaner */
