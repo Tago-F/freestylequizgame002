@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>更新履歴</h2>
+<mat-dialog-content>
+  <mat-list>
+    <div *ngFor="let log of data.logs; let last = last">
+      <h3>[{{ log.version }}] - {{ log.date }}</h3>
+      <div *ngFor="let category of getChangeCategories(log.changes)">
+        <div class="change-category">
+          <h4>{{ category | titlecase }}</h4>
+          <ul>
+            <li *ngFor="let item of log.changes[category]">{{ item }}</li>
+          </ul>
+        </div>
+      </div>
+      <mat-divider *ngIf="!last"></mat-divider>
+    </div>
+  </mat-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">閉じる</button>
+</mat-dialog-actions>
