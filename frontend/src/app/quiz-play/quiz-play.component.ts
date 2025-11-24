@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { PlayerStateService } from '../shared/player-state.service';
 import { QuizStateService } from '../shared/quiz-state.service';
 import { ApiService } from '../shared/api.service';
@@ -20,7 +20,6 @@ type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatToolbarModule,
     MatButtonModule,
     MatCardModule,
@@ -53,7 +52,7 @@ export class QuizPlayComponent implements OnInit {
   fetchNewQuiz(): void {
     // In turn-based mode, advance to the next player *before* fetching a new quiz,
     // but only if it's not the very first quiz.
-    if (this.quizState.gameMode() === 'turn' && this.quizState.history().length > 0) {
+    if (this.quizState.gameMode() === 'turn' && this.quizState.quiz() !== null) {
       this.playerState.nextTurn();
     }
 

@@ -10,6 +10,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.stringtemplate.v4.ST;
@@ -39,8 +42,9 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public QuizResponse generateQuiz(GenerateQuizRequest request) {
-        // 1. DBから過去の質問リストを取得
-        List<String> previousQuestions = askedQuestionRepository.findAllQuestions();
+        // 1. DBから指定ジャンルの過去問リストを最新15件取得
+        Pageable pageable = PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<String> previousQuestions = askedQuestionRepository.findQuestionsByGenre(request.getGenre(), pageable);
 
         // 2. プロンプトを組み立て
         ST st = new ST(quizGenerationPromptString);
@@ -64,7 +68,7 @@ public class QuizServiceImpl implements QuizService {
         // (ユニーク制約により、万が一同じ問題が生成されてもエラーとなり保存されない)
         try {
             if (quizResponse != null && quizResponse.getQuestion() != null) {
-                askedQuestionRepository.save(new AskedQuestion(quizResponse.getQuestion()));
+                askedQuestionRepository.save(new AskedQuestion(quizResponse.getQuestion(), request.getGenre()));
             }
         } catch (Exception e) {
             // DataIntegrityViolationExceptionなどが発生する可能性があるが、

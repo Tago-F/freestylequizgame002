@@ -8,6 +8,9 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -22,7 +25,13 @@ public class AskedQuestion {
     @Column(unique = true, length = 1024)
     private String question;
 
-    public AskedQuestion(String question) {
+    private String genre;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    public AskedQuestion(String question, String genre) {
         this.question = question;
+        this.genre = genre;
     }
 }
