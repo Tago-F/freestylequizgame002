@@ -1,7 +1,6 @@
 export interface GenerateQuizRequest {
   genre: string;
   difficulty: string;
-  previousQuestions?: string[];
 }
 
 export interface QuizResponse {
