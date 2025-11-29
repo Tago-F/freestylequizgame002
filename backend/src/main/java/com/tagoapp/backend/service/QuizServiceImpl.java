@@ -42,8 +42,8 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public QuizResponse generateQuiz(GenerateQuizRequest request) {
-        // 1. DBから指定ジャンルの過去問リストを最新15件取得
-        Pageable pageable = PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // 1. DBから指定ジャンルの過去問リストを最新30件取得
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<String> previousQuestions = askedQuestionRepository.findQuestionsByGenre(request.getGenre(), pageable);
 
         // 2. プロンプトを組み立て
