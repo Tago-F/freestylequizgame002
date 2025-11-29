@@ -32,6 +32,8 @@ export class QuizStateService {
   private selectedGenre = signal<string | null>(null);
   private selectedDifficulty = signal<string | null>(null);
   private selectedGameMode = signal<GameMode>('all');
+  private numberOfQuestions = signal<number>(Infinity); // New: Stores the total number of questions
+  private currentQuestionIndex = signal<number>(0);     // New: Tracks the current question number
   private currentQuiz = signal<QuizResponse | null>(null);
   private currentHint = signal<HintResponse | null>(null);
 
@@ -39,6 +41,8 @@ export class QuizStateService {
   public readonly genre = this.selectedGenre.asReadonly();
   public readonly difficulty = this.selectedDifficulty.asReadonly();
   public readonly gameMode = this.selectedGameMode.asReadonly();
+  public readonly totalQuestions = this.numberOfQuestions.asReadonly(); // New: Public accessor
+  public readonly questionIndex = this.currentQuestionIndex.asReadonly(); // New: Public accessor
   public readonly quiz = this.currentQuiz.asReadonly();
   public readonly hint = this.currentHint.asReadonly();
 
@@ -59,6 +63,14 @@ export class QuizStateService {
 
   setGameMode(mode: GameMode): void {
     this.selectedGameMode.set(mode);
+  }
+
+  setNumberOfQuestions(count: number): void { // New: Setter for total questions
+    this.numberOfQuestions.set(count);
+  }
+
+  incrementQuestionIndex(): void { // New: Method to increment question index
+    this.currentQuestionIndex.update(value => value + 1);
   }
 
   setCurrentQuiz(quiz: QuizResponse | null): void {
@@ -86,7 +98,10 @@ export class QuizStateService {
     this.selectedGenre.set(null);
     this.selectedDifficulty.set(null);
     this.selectedGameMode.set('all');
+    this.numberOfQuestions.set(Infinity);   // New: Reset total questions
+    this.currentQuestionIndex.set(0);       // New: Reset current question index
     this.currentQuiz.set(null);
     this.currentHint.set(null);
   }
 }
+
