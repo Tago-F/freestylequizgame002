@@ -55,13 +55,13 @@ export class QuizPlayComponent implements OnInit {
   }
 
   fetchNewQuiz(): void {
-    this.quizState.incrementQuestionIndex(); // Increment index for each new question
-
-    // Check if the quiz limit has been reached before fetching a new quiz
-    if (this.quizState.questionIndex() > this.quizState.totalQuestions()) {
+    // Check if the quiz limit has been reached *before* incrementing and fetching.
+    if (this.quizState.questionIndex() >= this.quizState.totalQuestions()) {
       this.openQuizResultModal();
       return;
     }
+
+    this.quizState.incrementQuestionIndex(); // Increment index for the upcoming question
 
     // In turn-based mode, advance to the next player *before* fetching a new quiz,
     // but only if it's not the very first quiz.
