@@ -4,6 +4,10 @@
     <span>ジャンル: {{ quizState.genre() }}</span>
     <span class="separator">/</span>
     <span>難易度: {{ quizState.difficulty() }}</span>
+    @if (quizState.totalQuestions() !== infinity) {
+      <span class="separator">/</span>
+      <span>{{ quizState.questionIndex() }} / {{ quizState.totalQuestions() }} 問目</span>
+    }
   </div>
   <span class="spacer"></span>
   <button mat-button (click)="addUser()">

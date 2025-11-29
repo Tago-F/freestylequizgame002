@@ -12,6 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // Import MatDialog and MatDialogModule
+import { QuizResultModal } from './quiz-result-modal/quiz-result-modal'; // Import QuizResultModal
 
 type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
 
@@ -24,7 +26,8 @@ type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule // Add MatDialogModule here
   ],
   templateUrl: './quiz-play.component.html',
   styleUrls: ['./quiz-play.component.css']
@@ -33,12 +36,14 @@ export class QuizPlayComponent implements OnInit {
   viewState = signal<ViewState>('loading');
   selectedAnswer = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+  infinity = Infinity; // Expose Infinity to the template
 
   constructor(
     public playerState: PlayerStateService,
     public quizState: QuizStateService,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    public dialog: MatDialog // Inject MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -50,12 +55,20 @@ export class QuizPlayComponent implements OnInit {
   }
 
   fetchNewQuiz(): void {
+    this.quizState.incrementQuestionIndex(); // Increment index for each new question
+
+    // Check if the quiz limit has been reached before fetching a new quiz
+    if (this.quizState.questionIndex() > this.quizState.totalQuestions()) {
+      this.openQuizResultModal();
+      return;
+    }
+
     // In turn-based mode, advance to the next player *before* fetching a new quiz,
     // but only if it's not the very first quiz.
     if (this.quizState.gameMode() === 'turn' && this.quizState.quiz() !== null) {
       this.playerState.nextTurn();
     }
-
+    
     this.viewState.set('loading');
     this.selectedAnswer.set(null);
     this.quizState.setCurrentHint(null);
@@ -135,8 +148,15 @@ export class QuizPlayComponent implements OnInit {
   }
 
   backToSettings(): void {
-    this.quizState.resetQuizState();
+    this.quizState.resetQuizState(); // Reset quiz state before navigating back
     this.router.navigate(['/game-setup']);
+  }
+
+  openQuizResultModal(): void {
+    this.dialog.open(QuizResultModal, {
+      width: '350px',
+      disableClose: true // User must click the button to close
+    });
   }
 
   private handleError(message: string): void {

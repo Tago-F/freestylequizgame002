@@ -68,6 +68,19 @@ import { MatIconModule } from '@angular/material/icon';
             <mat-button-toggle value="turn">ターン制モード</mat-button-toggle>
           </mat-button-toggle-group>
         </div>
+
+        <div class="section">
+          <h2>問題数</h2>
+          <mat-button-toggle-group
+            class="button-group"
+            [value]="quizState.totalQuestions()"
+            (change)="selectNumberOfQuestions($event.value)">
+            <mat-button-toggle [value]="15">15問</mat-button-toggle>
+            <mat-button-toggle [value]="30">30問</mat-button-toggle>
+            <mat-button-toggle [value]="45">45問</mat-button-toggle>
+            <mat-button-toggle [value]="infinity">無制限</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
       </mat-card-content>
       <mat-card-actions class="actions">
         <a mat-button routerLink="/player-setup">
@@ -89,6 +102,8 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./game-setup.component.css']
 })
 export class GameSetupComponent {
+  infinity = Infinity; // Expose Infinity to the template
+
   constructor(public quizState: QuizStateService) {}
 
   selectGenre(genre: string): void {
@@ -101,5 +116,9 @@ export class GameSetupComponent {
 
   selectGameMode(mode: string): void {
     this.quizState.setGameMode(mode as GameMode);
+  }
+
+  selectNumberOfQuestions(count: number): void {
+    this.quizState.setNumberOfQuestions(count);
   }
 }
