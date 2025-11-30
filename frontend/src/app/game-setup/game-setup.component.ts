@@ -75,6 +75,7 @@ import { MatIconModule } from '@angular/material/icon';
             class="button-group"
             [value]="quizState.totalQuestions()"
             (change)="selectNumberOfQuestions($event.value)">
+            <mat-button-toggle [value]="5">5問</mat-button-toggle>
             <mat-button-toggle [value]="15">15問</mat-button-toggle>
             <mat-button-toggle [value]="30">30問</mat-button-toggle>
             <mat-button-toggle [value]="45">45問</mat-button-toggle>
