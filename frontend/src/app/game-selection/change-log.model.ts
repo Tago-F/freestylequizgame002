@@ -10,9 +10,58 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.2.0';
+export const APP_VERSION = '1.4.0';
 
 export const CHANGE_LOG: Changelog[] = [
+  {
+    version: '1.4.0',
+    date: '2025-11-29',
+    changes: {
+      changed: [
+        'クイズ設定画面のジャンル選択肢を大幅に拡充しました。',
+        'アニメ、映画、エンタメ、音楽、教養、サイエンス、ITスキルの各カテゴリに、より詳細なジャンルを追加しました。'
+      ],
+    },
+  },
+  {
+    version: '1.3.0',
+    date: '2025-11-29',
+    changes: {
+      added: [
+        'クイズの出題数を設定する機能を追加',
+        'クイズ結果（ランキング）を表示するリザルト画面を追加',
+      ],
+    },
+  },
+  {
+    version: '1.2.3',
+    date: '2025-11-29',
+    changes: {
+      changed: [
+        'クイズ文章の文字数上限を50文字から75文字に拡張',
+        '使用するGeminiモデルを `gemini-pro-1.5-flash-lite` から `gemini-1.5-flash` に変更',
+      ],
+    },
+  },
+  {
+    version: '1.2.2',
+    date: '2025-11-29',
+    changes: {
+      changed: [
+        'クイズ重複防止のためAIに連携する過去問の件数を15件から30件に増加',
+      ],
+    },
+  },
+  {
+    version: '1.2.1',
+    date: '2025-11-29',
+    changes: {
+      documentation: [
+        '肥大化した画面設計書を画面ごとに分割',
+        'タスク計画書のステータス管理方法を改善',
+      ],
+    },
+  },
   {
     version: '1.2.0',
     date: '2025-11-24',
@@ -28,7 +77,7 @@ export const CHANGE_LOG: Changelog[] = [
     date: '2025-11-24',
     changes: {
       changed: [
-        'クイズ重複防止機能の仕様を、選択ジャンルにおける最新15件のみ参照するよう変更',
+        'クイズ重複防止機能の仕様を、選択ジャンルにおける最新30件のみ参照するよう変更',
       ],
       documentation: [
         'クイズ重複防止機能の仕様変更に伴うドキュメント更新',
