@@ -10,9 +10,36 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.4.0';
+export const APP_VERSION = '1.4.3';
 
 export const CHANGE_LOG: Changelog[] = [
+  {
+    version: '1.4.3',
+    date: '2025-11-30',
+    changes: {
+      added: [
+        'クイズ設定画面の問題数選択肢に「5問」を追加しました。'
+      ],
+    },
+  },
+  {
+    version: '1.4.2',
+    date: '2025-11-30',
+    changes: {
+      fixed: [
+        'クイズ設定画面にて、画面サイズや拡大率によってコンテンツ上部が見切れてしまう不具合を修正'
+      ],
+    },
+  },
+  {
+    version: '1.4.1',
+    date: '2025-11-30',
+    changes: {
+      changed: [
+        'クイズ設定画面の初期値を変更しました。（難易度: ふつう、モード: ターン制、問題数: 15問）'
+      ],
+    },
+  },
   {
     version: '1.4.0',
     date: '2025-11-29',
