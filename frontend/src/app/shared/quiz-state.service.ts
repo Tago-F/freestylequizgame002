@@ -72,9 +72,9 @@ export class QuizStateService {
   public readonly difficulties = ['かんたん', 'ふつう', 'むずかしい'];
 
   private selectedGenre = signal<string | null>(null);
-  private selectedDifficulty = signal<string | null>(null);
-  private selectedGameMode = signal<GameMode>('all');
-  private numberOfQuestions = signal<number>(Infinity); // New: Stores the total number of questions
+  private selectedDifficulty = signal<string>('ふつう');
+  private selectedGameMode = signal<GameMode>('turn');
+  private numberOfQuestions = signal<number>(15); // New: Stores the total number of questions
   private currentQuestionIndex = signal<number>(0);     // New: Tracks the current question number
   private currentQuiz = signal<QuizResponse | null>(null);
   private currentHint = signal<HintResponse | null>(null);
@@ -138,9 +138,9 @@ export class QuizStateService {
 
   resetQuizState(): void {
     this.selectedGenre.set(null);
-    this.selectedDifficulty.set(null);
-    this.selectedGameMode.set('all');
-    this.numberOfQuestions.set(Infinity);   // New: Reset total questions
+    this.selectedDifficulty.set('ふつう');
+    this.selectedGameMode.set('turn');
+    this.numberOfQuestions.set(15);   // New: Reset total questions
     this.currentQuestionIndex.set(0);       // New: Reset current question index
     this.currentQuiz.set(null);
     this.currentHint.set(null);
