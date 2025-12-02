@@ -1,4 +1,67 @@
-/* You can add global styles to this file, and also import other style files */
+/* 1. 全体の設定と背景アニメーション */
+body {
+  margin: 0;
+  font-family: 'M PLUS Rounded 1c', Roboto, "Helvetica Neue", sans-serif;
+  min-height: 100vh;
+  color: #4a4a4a; /* 文字色は真っ黒ではなく濃いグレーで優しく */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+  /* パステルカラーのグラデーション背景 */
+  background: linear-gradient(300deg, #dceeff, #f4e1ff, #ffe4ef, #e0fbfd);
+  background-size: 240% 240%;
+  animation: gradient-animation 18s ease infinite;
+}
+
+/* 背景をゆっくり動かすアニメーション定義 */
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 2. カードのスタイル（グラスモーフィズム風） */
+.mat-mdc-card {
+  /* 半透明の白背景ですりガラス効果を狙う */
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  overflow: hidden; /* 角丸からはみ出さないように */
+}
+
+/* 3. ボタンのスタイル（丸く、パステルに） */
+.mat-mdc-raised-button, .mat-mdc-unelevated-button {
+  border-radius: 50px !important;
+  padding: 0 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em;
+  /* ボタンにも少し影をつける */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 枠線ボタンも丸く */
+.mat-mdc-outlined-button {
+  border-radius: 50px !important;
+  border-width: 2px !important;
+}
+
+/* 4. ヘッダー（ツールバー） */
+.mat-toolbar {
+  /* ヘッダーも半透明にして背景を透かす */
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px);
+  color: #5f6368 !important; /* アイコンなどの色 */
+  box-shadow: none !important;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+}
+
+/* 5. 選択トグルのスタイル調整 */
+.mat-button-toggle-appearance-standard {
+   background-color: rgba(255, 255, 255, 0.5);
+}
+.mat-button-toggle-checked {
+   background-color: #e3f2fd !important; /* 薄い青 */
+   color: #1565c0 !important;
+   font-weight: bold;
+}
