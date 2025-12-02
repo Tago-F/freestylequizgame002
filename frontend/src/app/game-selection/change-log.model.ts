@@ -10,15 +10,22 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.4.3';
+export const APP_VERSION = '1.4.4';
 
 export const CHANGE_LOG: Changelog[] = [
+  {
+    version: '1.4.4',
+    date: '2025-12-01',
+    changes: {
+      changed: ['アプリ全体の背景色を「シルキー・パステル（Silky Pastel）」な配色に変更']
+    }
+  },
   {
     version: '1.4.3',
     date: '2025-11-30',
     changes: {
       added: [
-        'クイズ設定画面の問題数選択肢に「5問」を追加しました。'
+        'クイズ設定画面の問題数選択肢に「5問」を追加'
       ],
     },
   },
@@ -36,7 +43,7 @@ export const CHANGE_LOG: Changelog[] = [
     date: '2025-11-30',
     changes: {
       changed: [
-        'クイズ設定画面の初期値を変更しました。（難易度: ふつう、モード: ターン制、問題数: 15問）'
+        'クイズ設定画面の初期値を変更（難易度: ふつう、モード: ターン制、問題数: 15問）'
       ],
     },
   },
@@ -45,8 +52,8 @@ export const CHANGE_LOG: Changelog[] = [
     date: '2025-11-29',
     changes: {
       changed: [
-        'クイズ設定画面のジャンル選択肢を大幅に拡充しました。',
-        'アニメ、映画、エンタメ、音楽、教養、サイエンス、ITスキルの各カテゴリに、より詳細なジャンルを追加しました。'
+        'クイズ設定画面のジャンル選択肢を大幅に拡充',
+        'アニメ、映画、エンタメ、音楽、教養、サイエンス、ITスキルの各カテゴリに、より詳細なジャンルを追加'
       ],
     },
   },
