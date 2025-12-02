@@ -10,9 +10,21 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.4.4';
+export const APP_VERSION = '1.4.5';
 
 export const CHANGE_LOG: Changelog[] = [
+  {
+    version: '1.4.5',
+    date: '2025-12-02',
+    changes: {
+      changed: [
+        'クイズ履歴の保存形式を詳細化し、問題文だけでなく選択肢、正解、解説、難易度を含む完全な情報をDBに保存するように変更',
+        'バックエンド: `AskedQuestion` エンティティと `AskedQuestionRepository` を廃止し、`Question` エンティティと `QuestionRepository` を導入',
+        'バックエンド: `QuizServiceImpl` をリファクタリングし、`Question` エンティティを利用してクイズを保存するように変更',
+        '関連ドキュメント（`タスク計画書.md`, `要件定義書.md`）を更新',
+      ]
+    }
+  },
   {
     version: '1.4.4',
     date: '2025-12-01',
