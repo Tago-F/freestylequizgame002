@@ -14,6 +14,13 @@ export interface GenreCategory {
 export class QuizStateService {
   public readonly genreCategories: GenreCategory[] = [
     {
+      name: '汎用',
+      genres: [
+        'ランダム',
+        '雑学'
+      ]
+    },
+    {
       name: 'アニメ',
       genres: [
         'アニメ（1990～1999年）',
@@ -50,7 +57,7 @@ export class QuizStateService {
     },
     {
       name: '教養',
-      genres: ['日本の歴史', '海外の歴史', '日本の地理', '海外の地理']
+      genres: ['日本の歴史', '海外の歴史', '日本の地理', '海外の地理', 'ご当地（東海地方）', 'ご当地（関東地方）']
     },
     {
       name: 'サイエンス',
