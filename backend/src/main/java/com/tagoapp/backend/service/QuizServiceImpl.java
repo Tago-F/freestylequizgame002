@@ -4,8 +4,8 @@ import com.tagoapp.backend.dto.GenerateQuizRequest;
 import com.tagoapp.backend.dto.HintRequest;
 import com.tagoapp.backend.dto.HintResponse;
 import com.tagoapp.backend.dto.QuizResponse;
-import com.tagoapp.backend.entity.AskedQuestion;
-import com.tagoapp.backend.repository.AskedQuestionRepository;
+import com.tagoapp.backend.entity.Question;
+import com.tagoapp.backend.repository.QuestionRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,14 +27,14 @@ public class QuizServiceImpl implements QuizService {
     private final ChatClient chatClient;
     private final String quizGenerationPromptString;
     private final String hintGenerationPromptString;
-    private final AskedQuestionRepository askedQuestionRepository;
+    private final QuestionRepository questionRepository;
 
     public QuizServiceImpl(ChatModel chatModel,
-                           AskedQuestionRepository askedQuestionRepository,
+                           QuestionRepository questionRepository,
                            @Value("classpath:prompts/quiz-generation.st") Resource quizGenerationResource,
                            @Value("classpath:prompts/hint-generation.st") Resource hintGenerationResource) throws IOException {
         this.chatClient = ChatClient.create(chatModel);
-        this.askedQuestionRepository = askedQuestionRepository;
+        this.questionRepository = questionRepository;
         this.quizGenerationPromptString = quizGenerationResource.getContentAsString(StandardCharsets.UTF_8);
         this.hintGenerationPromptString = hintGenerationResource.getContentAsString(StandardCharsets.UTF_8);
     }
@@ -44,7 +44,7 @@ public class QuizServiceImpl implements QuizService {
     public QuizResponse generateQuiz(GenerateQuizRequest request) {
         // 1. DBから指定ジャンルの過去問リストを最新30件取得
         Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<String> previousQuestions = askedQuestionRepository.findQuestionsByGenre(request.getGenre(), pageable);
+        List<String> previousQuestions = questionRepository.findContentByGenre(request.getGenre(), pageable);
 
         // 2. プロンプトを組み立て
         ST st = new ST(quizGenerationPromptString);
@@ -68,7 +68,22 @@ public class QuizServiceImpl implements QuizService {
         // (ユニーク制約により、万が一同じ問題が生成されてもエラーとなり保存されない)
         try {
             if (quizResponse != null && quizResponse.getQuestion() != null) {
-                askedQuestionRepository.save(new AskedQuestion(quizResponse.getQuestion(), request.getGenre()));
+                Question question = new Question();
+                question.setContent(quizResponse.getQuestion());
+                question.setGenre(request.getGenre());
+                question.setDifficulty(request.getDifficulty());
+                question.setCorrectAnswer(quizResponse.getCorrectAnswer());
+                question.setExplanation(quizResponse.getExplanation());
+
+                List<String> options = quizResponse.getOptions();
+                if (options != null) {
+                    if (options.size() > 0) question.setOption1(options.get(0));
+                    if (options.size() > 1) question.setOption2(options.get(1));
+                    if (options.size() > 2) question.setOption3(options.get(2));
+                    if (options.size() > 3) question.setOption4(options.get(3));
+                }
+
+                questionRepository.save(question);
             }
         } catch (Exception e) {
             // DataIntegrityViolationExceptionなどが発生する可能性があるが、
