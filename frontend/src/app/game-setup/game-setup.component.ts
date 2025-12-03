@@ -33,7 +33,7 @@ import { MatIconModule } from '@angular/material/icon';
             class="button-group-vertical"
             [value]="quizState.genre()"
             (change)="selectGenre($event.value)">
-            @for (category of quizState.genreCategories; track category.name) {
+            @for (category of quizState.genreCategories(); track category.name) {
               <div>
                 <h3 class="category-title">{{ category.name }}</h3>
                 <div class="button-row">
@@ -52,7 +52,7 @@ import { MatIconModule } from '@angular/material/icon';
             class="button-group"
             [value]="quizState.difficulty()"
             (change)="selectDifficulty($event.value)">
-            @for (d of quizState.difficulties; track d) {
+            @for (d of quizState.difficulties(); track d) {
               <mat-button-toggle [value]="d">{{ d }}</mat-button-toggle>
             }
           </mat-button-toggle-group>
@@ -64,8 +64,9 @@ import { MatIconModule } from '@angular/material/icon';
             class="button-group"
             [value]="quizState.gameMode()"
             (change)="selectGameMode($event.value)">
-            <mat-button-toggle value="all">全員回答モード</mat-button-toggle>
-            <mat-button-toggle value="turn">ターン制モード</mat-button-toggle>
+            @for (mode of quizState.gameModes(); track mode.key) {
+              <mat-button-toggle [value]="mode.key">{{ mode.displayName }}</mat-button-toggle>
+            }
           </mat-button-toggle-group>
         </div>
 

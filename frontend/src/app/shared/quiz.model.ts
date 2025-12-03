@@ -26,3 +26,19 @@ export interface ErrorResponse {
   message: string;
   path: string;
 }
+
+export interface GenreCategory {
+  name: string;
+  genres: string[];
+}
+
+export interface GameModeItem {
+  key: string;
+  displayName: string;
+}
+
+export interface GameConfigResponse {
+  genreCategories: GenreCategory[];
+  difficulties: string[];
+  gameModes: GameModeItem[];
+}
