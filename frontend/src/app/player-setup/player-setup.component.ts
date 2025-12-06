@@ -48,16 +48,16 @@ import { MatListModule } from '@angular/material/list';
         </mat-list>
       </mat-card-content>
       <mat-card-actions class="actions">
-        <a mat-stroked-button routerLink="/game-selection">
+        <a mat-stroked-button routerLink="/quiz/mode">
           <mat-icon>arrow_back</mat-icon>
-          ゲーム選択に戻る
+          モード選択に戻る
         </a>
         <span class="spacer"></span>
         <button mat-stroked-button color="primary" (click)="addPlayer()" [disabled]="playerState.playerCount() >= 16">
           <mat-icon>add</mat-icon>
           プレイヤーを追加 ({{ playerState.playerCount() }}/16)
         </button>
-        <a mat-raised-button color="primary" routerLink="/game-setup" [disabled]="playerState.playerCount() === 0">
+        <a mat-raised-button color="primary" routerLink="/quiz/game-setup" [disabled]="playerState.playerCount() === 0">
           設定へ進む
           <mat-icon>arrow_forward</mat-icon>
         </a>

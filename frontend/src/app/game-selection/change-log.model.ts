@@ -10,16 +10,30 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.4.5';
+export const APP_VERSION = '1.5.0';
 
 export const CHANGE_LOG: Changelog[] = [
-    {
+  {
+    version: '1.5.0',
+    date: '2025-12-06',
+    changes: {
+      added: [
+        'モード選択画面を追加',
+        '「ソロプレイ」「マルチプレイ」の選択肢を追加'
+      ],
+      changed: [
+        'ルーティング構成をリファクタリングし、クイズ機能を `/quiz/` 配下に階層化'
+      ]
+    }
+  },
+  {
     version: '1.4.6',
     date: '2025-12-03',
     changes: {
       changed: [
         'バックエンドのリファクタリングを実施',
-        'クイズ履歴テーブル用 Entity, Repository の削除'
+        'クイズ履歴テーブル用 Entity, Repository の削除',
+        'フロントエンド側の設定項目をバックエンドに移管'
       ]
     }
   },

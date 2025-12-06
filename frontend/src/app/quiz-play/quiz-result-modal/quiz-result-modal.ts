@@ -19,7 +19,7 @@ export class QuizResultModal {
   ) {}
 
   goToResults(): void {
-    this.router.navigate(['/result']);
+    this.router.navigate(['/quiz/result']);
     this.dialogRef.close();
   }
 }

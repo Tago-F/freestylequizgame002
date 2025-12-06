@@ -22,7 +22,7 @@ export class GameSelection {
   ) {}
 
   navigateToQuiz(): void {
-    this.router.navigate(['/player-setup']);
+    this.router.navigate(['/quiz/mode']);
   }
 
   openChangeLog(): void {

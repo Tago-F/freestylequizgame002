@@ -48,7 +48,7 @@ export class QuizPlayComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.quizState.isQuizConfigured()) {
-      this.router.navigate(['/game-setup']);
+      this.router.navigate(['/quiz/game-setup']);
       return;
     }
     this.fetchNewQuiz();
@@ -138,18 +138,18 @@ export class QuizPlayComponent implements OnInit {
   }
 
   addUser(): void {
-    this.router.navigate(['/player-setup']);
+    this.router.navigate(['/quiz/player-setup']);
   }
 
   resetGame(): void {
     this.playerState.reset();
     this.quizState.resetQuizState();
-    this.router.navigate(['/player-setup']);
+    this.router.navigate(['/quiz/player-setup']);
   }
 
   backToSettings(): void {
     this.quizState.resetQuizState(); // Reset quiz state before navigating back
-    this.router.navigate(['/game-setup']);
+    this.router.navigate(['/quiz/game-setup']);
   }
 
   openQuizResultModal(): void {

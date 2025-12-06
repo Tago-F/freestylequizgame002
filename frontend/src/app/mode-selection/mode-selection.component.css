@@ -1,0 +1,40 @@
+.mode-selection-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.mode-selection-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+}
+
+mat-card-header {
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+mat-card-title {
+  font-size: 24px;
+  margin: 0;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.mode-button {
+  padding: 12px;
+  font-size: 18px;
+  height: 60px;
+}
+
+.mode-button mat-icon {
+  margin-right: 8px;
+}

@@ -1,0 +1,25 @@
+<div class="mode-selection-container">
+  <mat-card class="mode-selection-card">
+    <mat-card-header>
+      <mat-card-title>モード選択</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="button-container">
+        <button mat-raised-button color="primary" class="mode-button" (click)="onSelectMode('solo')">
+          <mat-icon>person</mat-icon>
+          ソロプレイ
+        </button>
+        <button mat-raised-button color="accent" class="mode-button" (click)="onSelectMode('multi')">
+          <mat-icon>group</mat-icon>
+          マルチプレイ
+        </button>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button routerLink="/game-selection">
+        <mat-icon>arrow_back</mat-icon>
+        ゲーム選択に戻る
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

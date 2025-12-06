@@ -85,14 +85,14 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
       </mat-card-content>
       <mat-card-actions class="actions">
-        <a mat-button routerLink="/player-setup">
+        <a mat-button routerLink="/quiz/player-setup">
           <mat-icon>arrow_back</mat-icon>
           プレイヤー登録に戻る
         </a>
         <a
           mat-raised-button
           color="primary"
-          routerLink="/quiz-play"
+          routerLink="/quiz/play"
           [disabled]="!quizState.isQuizConfigured()"
         >
           クイズ開始
