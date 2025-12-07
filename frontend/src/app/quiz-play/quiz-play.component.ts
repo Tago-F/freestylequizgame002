@@ -150,19 +150,8 @@ export class QuizPlayComponent implements OnInit {
           this.isCorrect.set(result.correct);
           this.correctAnswer.set(result.correctAnswer);
           
-          // Update score
-          // We calculate the difference or just set it if PlayerStateService supported it.
-          // Since PlayerStateService has adjustScore, we need the diff. 
-          // But we don't know the previous score easily without checking.
-          // Let's just assume +10 for correct as per backend default, 
-          // OR better: `PlayerStateService` should ideally have `setScore`.
-          // I'll use adjustScore with the difference if correct.
-          // Backend adds 10 points.
-          if (result.correct) {
-              // Assuming standard 10 points for now as per backend logic
-              // Ideally we sync the whole player list from server?
-              this.adjustScore(currentPlayer.id, 10);
-          }
+          // Update score with the new method from PlayerStateService
+          this.playerState.updatePlayerScore(currentPlayer.id, result.newScore);
 
           this.viewState.set('answer');
         },

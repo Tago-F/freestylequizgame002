@@ -67,6 +67,12 @@ export class PlayerStateService {
     );
   }
 
+  updatePlayerScore(id: string, newScore: number) {
+    this.players.update(currentPlayers =>
+      currentPlayers.map(p => (p.id === id ? { ...p, score: newScore } : p))
+    );
+  }
+
   reset() {
     this.players.set([]);
     this.nextPlayerId = 1;

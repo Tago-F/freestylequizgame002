@@ -10,9 +10,20 @@ export interface Changelog {
   };
 }
 
-export const APP_VERSION = '1.5.0';
+export const APP_VERSION = '1.6.0';
 
 export const CHANGE_LOG: Changelog[] = [
+  {
+    version: '1.6.0',
+    date: '2025-12-07',
+    changes: {
+      changed: [
+        'セッション管理をバックエンドに移管',
+        'ゲーム参加、開始、回答用の API を新設',
+        'セッション ID を使用したセッション管理機能を追加'
+      ]
+    }
+  },
   {
     version: '1.5.0',
     date: '2025-12-06',
