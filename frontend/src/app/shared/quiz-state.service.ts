@@ -4,8 +4,6 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
 import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player } from './quiz.model';
 
-export type GameMode = 'all' | 'turn';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -16,11 +14,11 @@ export class QuizStateService {
   // Signals for config data loaded from API
   public readonly genreCategories = signal<GenreCategory[]>([]);
   public readonly difficulties = signal<string[]>([]);
-  public readonly gameModes = signal<GameModeItem[]>([]);
+  public readonly gameModes = signal<GameModeItem[]>([]); // Keep this for now, it's from GameConfigResponse
 
   private selectedGenre = signal<string | null>(null);
   private selectedDifficulty = signal<string>('ふつう');
-  private selectedGameMode = signal<GameMode>('turn');
+  private selectedTimeLimit = signal<number | null>(null); // New: Time limit signal
   private numberOfQuestions = signal<number>(15);
   private currentQuestionIndex = signal<number>(0);
   private currentQuiz = signal<QuizResponse | null>(null);
@@ -32,7 +30,7 @@ export class QuizStateService {
   // Public signals for components to read
   public readonly genre = this.selectedGenre.asReadonly();
   public readonly difficulty = this.selectedDifficulty.asReadonly();
-  public readonly gameMode = this.selectedGameMode.asReadonly();
+  public readonly timeLimit = this.selectedTimeLimit.asReadonly(); // New: Public time limit signal
   public readonly totalQuestions = this.numberOfQuestions.asReadonly();
   public readonly questionIndex = this.currentQuestionIndex.asReadonly();
   public readonly quiz = this.currentQuiz.asReadonly();
@@ -71,8 +69,9 @@ export class QuizStateService {
     this.selectedDifficulty.set(difficulty);
   }
 
-  setGameMode(mode: GameMode): void {
-    this.selectedGameMode.set(mode);
+  // New: Set time limit
+  setTimeLimit(seconds: number | null): void {
+    this.selectedTimeLimit.set(seconds);
   }
 
   setNumberOfQuestions(count: number): void {
@@ -95,10 +94,12 @@ export class QuizStateService {
   getQuizConfigRequest(): GenerateQuizRequest | null {
     const genre = this.selectedGenre();
     const difficulty = this.selectedDifficulty();
+    const timeLimit = this.selectedTimeLimit(); // Get time limit
     if (genre && difficulty) {
       return {
         genre,
-        difficulty
+        difficulty,
+        timeLimit // Include time limit
       };
     }
     return null;
@@ -187,7 +188,7 @@ export class QuizStateService {
   resetQuizState(): void {
     this.selectedGenre.set(null);
     this.selectedDifficulty.set('ふつう');
-    this.selectedGameMode.set('turn');
+    this.selectedTimeLimit.set(null); // Reset time limit
     this.numberOfQuestions.set(15);
     this.currentQuestionIndex.set(0);
     this.currentQuiz.set(null);

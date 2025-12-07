@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080'  // ローカル開発時はバックエンドのURLを指定
+  apiUrl: 'http://localhost:8080',
+  wsUrl: 'ws://localhost:8080/ws'
 };

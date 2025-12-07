@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { QuizStateService, GameMode } from '../shared/quiz-state.service';
+import { QuizStateService } from '../shared/quiz-state.service';
 import { PlayerStateService } from '../shared/player-state.service';
 
 // Angular Material Imports
@@ -60,14 +60,15 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
 
         <div class="section">
-          <h2>ゲームモード</h2>
+          <h2>制限時間</h2>
           <mat-button-toggle-group
             class="button-group"
-            [value]="quizState.gameMode()"
-            (change)="selectGameMode($event.value)">
-            @for (mode of quizState.gameModes(); track mode.key) {
-              <mat-button-toggle [value]="mode.key">{{ mode.displayName }}</mat-button-toggle>
-            }
+            [value]="selectedTimeLimit"
+            (change)="selectTimeLimit($event.value)">
+            <mat-button-toggle [value]="null">なし</mat-button-toggle>
+            <mat-button-toggle [value]="10">10秒</mat-button-toggle>
+            <mat-button-toggle [value]="30">30秒</mat-button-toggle>
+            <mat-button-toggle [value]="60">60秒</mat-button-toggle>
           </mat-button-toggle-group>
         </div>
 
@@ -104,14 +105,19 @@ import { MatIconModule } from '@angular/material/icon';
   `,
   styleUrls: ['./game-setup.component.css']
 })
-export class GameSetupComponent {
+export class GameSetupComponent implements OnInit {
   infinity = Infinity; // Expose Infinity to the template
+  selectedTimeLimit: number | null = null; // Property to hold the selected time limit
 
   constructor(
     public quizState: QuizStateService,
     private router: Router,
     public playerState: PlayerStateService
   ) {}
+
+  ngOnInit(): void {
+    this.selectedTimeLimit = this.quizState.timeLimit();
+  }
 
   async startGame(): Promise<void> {
     const joinedPlayers = await this.quizState.initializeOnlineGame(this.playerState.playerList());
@@ -131,8 +137,9 @@ export class GameSetupComponent {
     this.quizState.setDifficulty(difficulty);
   }
 
-  selectGameMode(mode: string): void {
-    this.quizState.setGameMode(mode as GameMode);
+  selectTimeLimit(seconds: number | null): void {
+    this.selectedTimeLimit = seconds;
+    this.quizState.setTimeLimit(seconds);
   }
 
   selectNumberOfQuestions(count: number): void {

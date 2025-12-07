@@ -1,6 +1,7 @@
 export interface GenerateQuizRequest {
   genre: string;
   difficulty: string;
+  timeLimit?: number | null;
 }
 
 export interface QuizResponse {
