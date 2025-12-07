@@ -8,6 +8,10 @@
       <span class="separator">/</span>
       <span>{{ quizState.questionIndex() }} / {{ quizState.totalQuestions() }} 問目</span>
     }
+    @if (quizState.remainingTime(); as time) {
+      <span class="separator">/</span>
+      <span>残り時間: {{ time }}秒</span>
+    }
   </div>
   <span class="spacer"></span>
   <button mat-button (click)="addUser()">

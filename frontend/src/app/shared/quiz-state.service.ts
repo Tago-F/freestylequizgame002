@@ -2,13 +2,17 @@ import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
-import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player } from './quiz.model';
+import { WebSocketService } from './websocket.service';
+import { PlayerStateService } from './player-state.service';
+import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player, GameSession } from './quiz.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuizStateService {
   private apiService = inject(ApiService);
+  private webSocketService = inject(WebSocketService);
+  private playerStateService = inject(PlayerStateService);
   private platformId = inject(PLATFORM_ID);
 
   // Signals for config data loaded from API
@@ -26,6 +30,7 @@ export class QuizStateService {
   private currentSessionId = signal<string | null>(null); // New: Session ID signal
   private isLoading = signal<boolean>(false); // Added missing isLoading
   private error = signal<string | null>(null); // Added missing error
+  private _remainingTime = signal<number | null>(null);
 
   // Public signals for components to read
   public readonly genre = this.selectedGenre.asReadonly();
@@ -38,6 +43,7 @@ export class QuizStateService {
   public readonly sessionId = this.currentSessionId.asReadonly();
   public readonly loading = this.isLoading.asReadonly();
   public readonly errorMessage = this.error.asReadonly();
+  public readonly remainingTime = this._remainingTime.asReadonly();
 
   // Computed signal to check if both genre and difficulty are selected
   public readonly isQuizConfigured = computed(() =>
@@ -104,6 +110,22 @@ export class QuizStateService {
     }
     return null;
   }
+
+  connectToSession(sessionId: string): void {
+    this.webSocketService.connect();
+    this.webSocketService.watch('/topic/room/' + sessionId).subscribe(message => {
+        const gameSession: GameSession = JSON.parse(message.body);
+        if (gameSession.currentQuiz) {
+            this.currentQuiz.set(gameSession.currentQuiz);
+        }
+        if (gameSession.remainingTime !== undefined) {
+             this._remainingTime.set(gameSession.remainingTime);
+        }
+        if (gameSession.players) {
+            this.playerStateService.setPlayers(gameSession.players);
+        }
+    });
+  }
   
   // New: Initialize online game
   async initializeOnlineGame(players: Player[]): Promise<Player[] | null> {
@@ -122,6 +144,9 @@ export class QuizStateService {
       this.currentSessionId.set(sessionResponse.sessionId);
       const sessionId = sessionResponse.sessionId;
 
+      // Connect to WebSocket
+      this.connectToSession(sessionId);
+
       // Step 2: Join Players
       const joinPromises = players.map(player =>
         firstValueFrom(this.apiService.joinGameSession(sessionId, player.name, player.icon))
@@ -132,12 +157,7 @@ export class QuizStateService {
       // Step 3: Start Game
       await firstValueFrom(this.apiService.startGame(sessionId));
 
-      // Fetch initial state
-      const gameSession = await firstValueFrom(this.apiService.getGameSession(sessionId));
-      if (gameSession.currentQuiz) {
-        this.currentQuiz.set(gameSession.currentQuiz);
-      }
-
+      // Fetch initial state is removed as WS should handle updates, but we return joinedPlayers as before.
       return joinedPlayers;
 
     } catch (err: any) {
@@ -195,5 +215,6 @@ export class QuizStateService {
     this.currentHint.set(null);
     this.currentSessionId.set(null);
     this.error.set(null);
+    this._remainingTime.set(null);
   }
 }

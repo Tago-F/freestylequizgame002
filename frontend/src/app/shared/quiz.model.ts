@@ -66,4 +66,5 @@ export interface GameSession {
   status: GameStatus;
   currentTurnIndex: number;
   currentQuiz?: QuizResponse;
+  remainingTime: number;
 }
