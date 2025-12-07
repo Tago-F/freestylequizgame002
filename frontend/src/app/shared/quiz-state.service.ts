@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
-import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem } from './quiz.model';
+import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player } from './quiz.model';
 
 export type GameMode = 'all' | 'turn';
 
@@ -21,19 +21,25 @@ export class QuizStateService {
   private selectedGenre = signal<string | null>(null);
   private selectedDifficulty = signal<string>('ふつう');
   private selectedGameMode = signal<GameMode>('turn');
-  private numberOfQuestions = signal<number>(15); // New: Stores the total number of questions
-  private currentQuestionIndex = signal<number>(0);     // New: Tracks the current question number
+  private numberOfQuestions = signal<number>(15);
+  private currentQuestionIndex = signal<number>(0);
   private currentQuiz = signal<QuizResponse | null>(null);
   private currentHint = signal<HintResponse | null>(null);
+  private currentSessionId = signal<string | null>(null); // New: Session ID signal
+  private isLoading = signal<boolean>(false); // Added missing isLoading
+  private error = signal<string | null>(null); // Added missing error
 
   // Public signals for components to read
   public readonly genre = this.selectedGenre.asReadonly();
   public readonly difficulty = this.selectedDifficulty.asReadonly();
   public readonly gameMode = this.selectedGameMode.asReadonly();
-  public readonly totalQuestions = this.numberOfQuestions.asReadonly(); // New: Public accessor
-  public readonly questionIndex = this.currentQuestionIndex.asReadonly(); // New: Public accessor
+  public readonly totalQuestions = this.numberOfQuestions.asReadonly();
+  public readonly questionIndex = this.currentQuestionIndex.asReadonly();
   public readonly quiz = this.currentQuiz.asReadonly();
   public readonly hint = this.currentHint.asReadonly();
+  public readonly sessionId = this.currentSessionId.asReadonly();
+  public readonly loading = this.isLoading.asReadonly();
+  public readonly errorMessage = this.error.asReadonly();
 
   // Computed signal to check if both genre and difficulty are selected
   public readonly isQuizConfigured = computed(() =>
@@ -69,11 +75,11 @@ export class QuizStateService {
     this.selectedGameMode.set(mode);
   }
 
-  setNumberOfQuestions(count: number): void { // New: Setter for total questions
+  setNumberOfQuestions(count: number): void {
     this.numberOfQuestions.set(count);
   }
 
-  incrementQuestionIndex(): void { // New: Method to increment question index
+  incrementQuestionIndex(): void {
     this.currentQuestionIndex.update(value => value + 1);
   }
 
@@ -97,14 +103,96 @@ export class QuizStateService {
     }
     return null;
   }
+  
+  // New: Initialize online game
+  async initializeOnlineGame(players: Player[]): Promise<Player[] | null> {
+    const settings = this.getQuizConfigRequest();
+    if (!settings) {
+      this.error.set('Quiz configuration is incomplete.');
+      return null;
+    }
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    try {
+      // Step 1: Create Game Session
+      const sessionResponse = await firstValueFrom(this.apiService.createGameSession(settings));
+      this.currentSessionId.set(sessionResponse.sessionId);
+      const sessionId = sessionResponse.sessionId;
+
+      // Step 2: Join Players
+      const joinPromises = players.map(player =>
+        firstValueFrom(this.apiService.joinGameSession(sessionId, player.name, player.icon))
+      );
+      
+      const joinedPlayers = await Promise.all(joinPromises);
+
+      // Step 3: Start Game
+      await firstValueFrom(this.apiService.startGame(sessionId));
+
+      // Fetch initial state
+      const gameSession = await firstValueFrom(this.apiService.getGameSession(sessionId));
+      if (gameSession.currentQuiz) {
+        this.currentQuiz.set(gameSession.currentQuiz);
+      }
+
+      return joinedPlayers;
+
+    } catch (err: any) {
+      this.error.set(err.message || 'Failed to initialize online game');
+      console.error('Online game initialization error:', err);
+      return null;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+  
+  async generateQuiz(): Promise<void> {
+      const settings = this.getQuizConfigRequest();
+      if (!settings) return;
+
+      this.isLoading.set(true);
+      this.error.set(null);
+
+      try {
+        const quiz = await firstValueFrom(this.apiService.generateQuiz(settings));
+        this.currentQuiz.set(quiz);
+      } catch (err: any) {
+        this.error.set(err.message || 'Failed to generate quiz');
+        console.error('Quiz generation error:', err);
+      } finally {
+        this.isLoading.set(false);
+      }
+    }
+    
+  async generateHint(): Promise<void> {
+      const quiz = this.currentQuiz();
+      if (!quiz) return;
+
+      this.isLoading.set(true);
+      try {
+        const response = await firstValueFrom(this.apiService.generateHint({
+          question: quiz.question,
+          options: quiz.options
+        }));
+        this.currentHint.set(response);
+      } catch (err: any) {
+        console.error('Hint generation error:', err);
+      } finally {
+        this.isLoading.set(false);
+      }
+    }
 
   resetQuizState(): void {
     this.selectedGenre.set(null);
     this.selectedDifficulty.set('ふつう');
     this.selectedGameMode.set('turn');
-    this.numberOfQuestions.set(15);   // New: Reset total questions
-    this.currentQuestionIndex.set(0);       // New: Reset current question index
+    this.numberOfQuestions.set(15);
+    this.currentQuestionIndex.set(0);
     this.currentQuiz.set(null);
     this.currentHint.set(null);
+    this.currentSessionId.set(null);
+    this.error.set(null);
   }
 }

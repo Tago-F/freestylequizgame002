@@ -2,6 +2,7 @@ package com.tagoapp.backend.controller;
 
 import com.tagoapp.backend.dto.AnswerResult;
 import com.tagoapp.backend.dto.GenerateQuizRequest;
+import com.tagoapp.backend.dto.QuizResponse;
 import com.tagoapp.backend.model.GameSession;
 import com.tagoapp.backend.model.Player;
 import com.tagoapp.backend.service.GameService;
@@ -47,6 +48,12 @@ public class GameController {
     public ResponseEntity<GameSession> getSession(@PathVariable String sessionId) {
         GameSession session = gameService.getSession(sessionId);
         return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("/{sessionId}/next")
+    public ResponseEntity<QuizResponse> nextQuestion(@PathVariable String sessionId) {
+        QuizResponse quiz = gameService.nextQuestion(sessionId);
+        return ResponseEntity.ok(quiz);
     }
 
     @PostMapping("/{sessionId}/answer")

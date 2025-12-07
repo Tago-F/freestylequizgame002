@@ -74,11 +74,11 @@ export class PlayerSetupComponent {
     this.playerState.addPlayer();
   }
 
-  removePlayer(id: number): void {
+  removePlayer(id: string): void {
     this.playerState.removePlayer(id);
   }
 
-  updateName(id: number, event: any): void {
+  updateName(id: string, event: any): void {
     const newName = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
     this.playerState.updatePlayerName(id, newName);
   }

@@ -60,6 +60,17 @@ public class GameService {
         session.setCurrentQuiz(quiz);
     }
 
+    public QuizResponse nextQuestion(String sessionId) {
+        GameSession session = getSession(sessionId);
+        if (session.getStatus() != GameStatus.PLAYING) {
+            throw new IllegalStateException("Game is not in PLAYING state.");
+        }
+
+        QuizResponse quiz = quizService.generateQuiz(session.getSettings());
+        session.setCurrentQuiz(quiz);
+        return quiz;
+    }
+
     public AnswerResult submitAnswer(String sessionId, String playerId, String answer) {
         GameSession session = getSession(sessionId);
         
@@ -72,7 +83,7 @@ public class GameService {
             throw new IllegalStateException("No active quiz found.");
         }
 
-        boolean isCorrect = currentQuiz.getAnswer().equalsIgnoreCase(answer);
+        boolean isCorrect = currentQuiz.getCorrectAnswer().equalsIgnoreCase(answer);
         int newScore = 0;
 
         Player player = session.getPlayers().stream()
@@ -93,6 +104,6 @@ public class GameService {
             session.setCurrentTurnIndex(nextTurnIndex);
         }
 
-        return new AnswerResult(isCorrect, currentQuiz.getAnswer(), newScore);
+        return new AnswerResult(isCorrect, currentQuiz.getCorrectAnswer(), newScore);
     }
 }

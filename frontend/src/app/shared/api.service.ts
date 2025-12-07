@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { GenerateQuizRequest, QuizResponse, HintRequest, HintResponse, GameConfigResponse } from './quiz.model';
+import { GenerateQuizRequest, QuizResponse, HintRequest, HintResponse, GameConfigResponse, Player, GameSession, AnswerResult } from './quiz.model';
 import { environment } from '../../../environments/environment'
 
 @Injectable({
@@ -22,5 +22,29 @@ export class ApiService {
 
   generateHint(request: HintRequest): Observable<HintResponse> {
     return this.http.post<HintResponse>(`${this.baseUrl}/quiz/hint`, request);
+  }
+
+  createGameSession(settings: GenerateQuizRequest): Observable<{sessionId: string}> {
+    return this.http.post<{sessionId: string}>(`${this.baseUrl}/game/create`, settings);
+  }
+
+  joinGameSession(sessionId: string, playerName: string, icon: string): Observable<Player> {
+    return this.http.post<Player>(`${this.baseUrl}/game/${sessionId}/join`, { playerName, icon });
+  }
+
+  startGame(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/game/${sessionId}/start`, {});
+  }
+
+  getGameSession(sessionId: string): Observable<GameSession> {
+    return this.http.get<GameSession>(`${this.baseUrl}/game/${sessionId}`);
+  }
+
+  submitAnswer(sessionId: string, playerId: string, answer: string): Observable<AnswerResult> {
+    return this.http.post<AnswerResult>(`${this.baseUrl}/game/${sessionId}/answer`, { playerId, answer });
+  }
+
+  nextQuestion(sessionId: string): Observable<QuizResponse> {
+    return this.http.post<QuizResponse>(`${this.baseUrl}/game/${sessionId}/next`, {});
   }
 }

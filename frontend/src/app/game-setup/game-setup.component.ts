@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { QuizStateService, GameMode } from '../shared/quiz-state.service';
+import { PlayerStateService } from '../shared/player-state.service';
 
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
@@ -89,15 +90,15 @@ import { MatIconModule } from '@angular/material/icon';
           <mat-icon>arrow_back</mat-icon>
           プレイヤー登録に戻る
         </a>
-        <a
+        <button
           mat-raised-button
           color="primary"
-          routerLink="/quiz/play"
-          [disabled]="!quizState.isQuizConfigured()"
+          (click)="startGame()"
+          [disabled]="!quizState.isQuizConfigured() || quizState.loading()"
         >
           クイズ開始
           <mat-icon>play_arrow</mat-icon>
-        </a>
+        </button>
       </mat-card-actions>
     </mat-card>
   `,
@@ -106,7 +107,21 @@ import { MatIconModule } from '@angular/material/icon';
 export class GameSetupComponent {
   infinity = Infinity; // Expose Infinity to the template
 
-  constructor(public quizState: QuizStateService) {}
+  constructor(
+    public quizState: QuizStateService,
+    private router: Router,
+    public playerState: PlayerStateService
+  ) {}
+
+  async startGame(): Promise<void> {
+    const joinedPlayers = await this.quizState.initializeOnlineGame(this.playerState.playerList());
+    
+    if (joinedPlayers) {
+      // サーバーから返却されたUUID付きのプレイヤー情報で更新
+      this.playerState.setPlayers(joinedPlayers);
+      this.router.navigate(['/quiz/play']);
+    }
+  }
 
   selectGenre(genre: string): void {
     this.quizState.setGenre(genre);

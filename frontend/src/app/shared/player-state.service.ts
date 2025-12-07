@@ -34,7 +34,7 @@ export class PlayerStateService {
       return; // Do not add more than 16 players
     }
     const newPlayer: Player = {
-      id: this.nextPlayerId++,
+      id: (this.nextPlayerId++).toString(),
       name: `Player ${this.nextPlayerId - 1}`,
       icon: ICONS[(this.nextPlayerId - 2) % ICONS.length],
       score: 0
@@ -42,14 +42,14 @@ export class PlayerStateService {
     this.players.update(currentPlayers => [...currentPlayers, newPlayer]);
   }
 
-  removePlayer(id: number) {
+  removePlayer(id: string) {
     this.players.update(currentPlayers => currentPlayers.filter(p => p.id !== id));
     if (this.currentPlayerIndex() >= this.players().length) {
       this.currentPlayerIndex.set(0);
     }
   }
 
-  updatePlayerName(id: number, newName: string) {
+  updatePlayerName(id: string, newName: string) {
     this.players.update(currentPlayers =>
       currentPlayers.map(p => (p.id === id ? { ...p, name: newName } : p))
     );
@@ -61,7 +61,7 @@ export class PlayerStateService {
     }
   }
 
-  adjustScore(playerId: number, amount: number) {
+  adjustScore(playerId: string, amount: number) {
     this.players.update(currentPlayers =>
       currentPlayers.map(p => (p.id === playerId ? { ...p, score: p.score + amount } : p))
     );
@@ -72,5 +72,10 @@ export class PlayerStateService {
     this.nextPlayerId = 1;
     this.currentPlayerIndex.set(0);
     this.addPlayer();
+  }
+
+  setPlayers(players: Player[]): void {
+    this.players.set(players);
+    this.currentPlayerIndex.set(0); // インデックスをリセット
   }
 }
