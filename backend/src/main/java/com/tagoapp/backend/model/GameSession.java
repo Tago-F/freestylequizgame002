@@ -13,6 +13,7 @@ public class GameSession {
     private int currentTurnIndex;
     private GenerateQuizRequest settings;
     private QuizResponse currentQuiz;
+    private Integer remainingTime;
 
     public GameSession(String sessionId, GenerateQuizRequest settings) {
         this.sessionId = sessionId;
@@ -72,5 +73,13 @@ public class GameSession {
 
     public void setCurrentQuiz(QuizResponse currentQuiz) {
         this.currentQuiz = currentQuiz;
+    }
+
+    public Integer getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(Integer remainingTime) {
+        this.remainingTime = remainingTime;
     }
 }

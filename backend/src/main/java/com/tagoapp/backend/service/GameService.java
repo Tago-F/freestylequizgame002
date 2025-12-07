@@ -7,22 +7,31 @@ import com.tagoapp.backend.model.GameSession;
 import com.tagoapp.backend.model.GameStatus;
 import com.tagoapp.backend.model.Player;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class GameService {
 
     private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
     private final QuizService quizService;
+    private final SimpMessagingTemplate template;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final Map<String, ScheduledFuture<?>> sessionTimers = new ConcurrentHashMap<>();
 
     @Autowired
-    public GameService(QuizService quizService) {
+    public GameService(QuizService quizService, SimpMessagingTemplate template) {
         this.quizService = quizService;
+        this.template = template;
     }
 
     public String createSession(GenerateQuizRequest settings) {
@@ -41,6 +50,9 @@ public class GameService {
         String playerId = UUID.randomUUID().toString();
         Player player = new Player(playerId, playerName, icon);
         session.addPlayer(player);
+        
+        broadcastState(sessionId);
+        
         return player;
     }
 
@@ -58,6 +70,9 @@ public class GameService {
         
         QuizResponse quiz = quizService.generateQuiz(session.getSettings());
         session.setCurrentQuiz(quiz);
+
+        startCountdown(sessionId);
+        broadcastState(sessionId);
     }
 
     public QuizResponse nextQuestion(String sessionId) {
@@ -68,6 +83,10 @@ public class GameService {
 
         QuizResponse quiz = quizService.generateQuiz(session.getSettings());
         session.setCurrentQuiz(quiz);
+
+        startCountdown(sessionId);
+        broadcastState(sessionId);
+
         return quiz;
     }
 
@@ -103,7 +122,80 @@ public class GameService {
             int nextTurnIndex = (session.getCurrentTurnIndex() + 1) % players.size();
             session.setCurrentTurnIndex(nextTurnIndex);
         }
+        
+        AnswerResult result = new AnswerResult(isCorrect, currentQuiz.getCorrectAnswer(), newScore);
+        
+        // Stop timer when answer submitted (optional, but good for turn-based) or let it run?
+        // Usually for turn-based, we stop or reset.
+        // But instruction says: "タイマーの停止: セッション終了時や次の問題に行く際"
+        // It does not explicitly say to stop on answer, but usually we proceed to next question manually or automatically.
+        // For now, I will NOT stop the timer on answer submission, assuming "nextQuestion" will stop it.
+        
+        broadcastState(sessionId);
+        
+        return result;
+    }
 
-        return new AnswerResult(isCorrect, currentQuiz.getCorrectAnswer(), newScore);
+    private void broadcastState(String sessionId) {
+        GameSession session = getSession(sessionId);
+        template.convertAndSend("/topic/room/" + sessionId, session);
+    }
+
+    private void startCountdown(String sessionId) {
+        stopCountdown(sessionId);
+
+        GameSession session = getSession(sessionId);
+        Integer timeLimit = session.getSettings().getTimeLimit();
+
+        if (timeLimit == null || timeLimit <= 0) {
+            return;
+        }
+
+        session.setRemainingTime(timeLimit);
+        // broadcastState is called after this in caller methods (startGame, nextQuestion)
+        // But for update consistency, we might want to broadcast here or rely on callers.
+        // The callers call broadcastState AFTER calling startCountdown, so the initial time is sent.
+        
+        ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
+            try {
+                // Check if session still exists
+                if (!sessions.containsKey(sessionId)) {
+                    stopCountdown(sessionId);
+                    return;
+                }
+                
+                // Re-fetch session in case object reference changed (though it shouldn't in this map structure)
+                // But concurrency-wise, simple get is fine.
+                // However, we need to modify session state.
+                synchronized (session) {
+                    Integer remaining = session.getRemainingTime();
+                    if (remaining == null) return;
+                    
+                    remaining--;
+                    session.setRemainingTime(remaining);
+                    
+                    if (remaining <= 0) {
+                        stopCountdown(sessionId);
+                        System.out.println("Time Up! Session: " + sessionId);
+                        // Optional: trigger next turn or state change?
+                        // For now just broadcast 0.
+                    }
+                }
+                broadcastState(sessionId);
+                
+            } catch (Exception e) {
+                System.err.println("Error in timer for session " + sessionId + ": " + e.getMessage());
+                stopCountdown(sessionId);
+            }
+        }, 1, 1, TimeUnit.SECONDS);
+
+        sessionTimers.put(sessionId, timer);
+    }
+    
+    private void stopCountdown(String sessionId) {
+        ScheduledFuture<?> timer = sessionTimers.remove(sessionId);
+        if (timer != null) {
+            timer.cancel(true);
+        }
     }
 }
