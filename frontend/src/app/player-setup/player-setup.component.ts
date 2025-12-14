@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PlayerStateService } from '../shared/player-state.service';
 import { QuizStateService } from '../shared/quiz-state.service';
@@ -20,7 +20,6 @@ const ICONS = ['👤', '🤖', '🦊', '🐼', '🐨', '🦁', '🐯', '🐷', '
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     FormsModule,
     MatCardModule,
     MatFormFieldModule,
