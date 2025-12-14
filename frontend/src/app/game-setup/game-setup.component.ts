@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms'; // Added
 import { QuizStateService } from '../shared/quiz-state.service';
 import { PlayerStateService } from '../shared/player-state.service';
 
@@ -9,6 +10,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input'; // Added
+import { MatFormFieldModule } from '@angular/material/form-field'; // Added
 
 @Component({
   selector: 'app-game-setup',
@@ -16,18 +19,29 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     CommonModule,
     RouterLink,
+    FormsModule, // Added
     MatCardModule,
     MatButtonModule,
     MatButtonToggleModule,
-    MatIconModule
+    MatIconModule,
+    MatInputModule, // Added
+    MatFormFieldModule // Added
   ],
   template: `
     <mat-card class="container">
       <mat-card-header>
-        <mat-card-title>クイズ設定</mat-card-title>
-        <mat-card-subtitle>挑戦したいクイズのジャンルと難易度を選択してください</mat-card-subtitle>
+        <mat-card-title>Create Room</mat-card-title>
+        <mat-card-subtitle>Configure your game session</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
+      
+        <div class="section">
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Room Name</mat-label>
+                <input matInput [(ngModel)]="roomName" placeholder="Enter room name">
+            </mat-form-field>
+        </div>
+
         <div class="section">
           <h2>ジャンル</h2>
           <mat-button-toggle-group
@@ -94,11 +108,11 @@ import { MatIconModule } from '@angular/material/icon';
         <button
           mat-raised-button
           color="primary"
-          (click)="startGame()"
-          [disabled]="!quizState.isQuizConfigured() || quizState.loading()"
+          (click)="createRoom()"
+          [disabled]="!quizState.isQuizConfigured() || quizState.loading() || !roomName"
         >
-          クイズ開始
-          <mat-icon>play_arrow</mat-icon>
+          ルームを作成 (Create Room)
+          <mat-icon>add_circle</mat-icon>
         </button>
       </mat-card-actions>
     </mat-card>
@@ -108,6 +122,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class GameSetupComponent implements OnInit {
   infinity = Infinity; // Expose Infinity to the template
   selectedTimeLimit: number | null = null; // Property to hold the selected time limit
+  roomName: string = '';
 
   constructor(
     public quizState: QuizStateService,
@@ -119,13 +134,15 @@ export class GameSetupComponent implements OnInit {
     this.selectedTimeLimit = this.quizState.timeLimit();
   }
 
-  async startGame(): Promise<void> {
-    const joinedPlayers = await this.quizState.initializeOnlineGame(this.playerState.playerList());
-    
-    if (joinedPlayers) {
-      // サーバーから返却されたUUID付きのプレイヤー情報で更新
-      this.playerState.setPlayers(joinedPlayers);
-      this.router.navigate(['/quiz/play']);
+  async createRoom(): Promise<void> {
+    const settings = this.quizState.getQuizConfigRequest();
+    if (settings) {
+        settings.roomName = this.roomName;
+        // Assume first player is the host (myself)
+        const me = this.playerState.playerList()[0]; 
+        if (me) {
+            await this.quizState.hostGame(settings, me.name, me.icon);
+        }
     }
   }
 

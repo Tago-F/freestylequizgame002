@@ -10,6 +10,9 @@ export class PlayerStateService {
   private players = signal<Player[]>([]);
   private nextPlayerId = 1;
   private currentPlayerIndex = signal(0);
+  
+  // New: Current user's player ID
+  private _myPlayerId = signal<string | null>(null);
 
   // Public signals for components to read
   public readonly playerList = this.players.asReadonly();
@@ -22,11 +25,16 @@ export class PlayerStateService {
     }
     return players[index];
   });
+  public readonly myPlayerId = this._myPlayerId.asReadonly();
 
 
   constructor() {
     // Start with one default player
     this.addPlayer();
+  }
+  
+  setMyPlayerId(id: string) {
+      this._myPlayerId.set(id);
   }
 
   addPlayer() {

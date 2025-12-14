@@ -6,6 +6,7 @@ import { GameSelection } from './game-selection/game-selection';
 import { QuizResultComponent } from './quiz-result/quiz-result.component';
 import { ModeSelectionComponent } from './mode-selection/mode-selection.component'; // ModeSelectionComponentのインポートを追加
 import { RoomListComponent } from './room-list/room-list.component';
+import { WaitingRoomComponent } from './waiting-room/waiting-room.component';
 
 export const routes: Routes = [
   { path: 'game-selection', component: GameSelection },
@@ -14,6 +15,7 @@ export const routes: Routes = [
     children: [
       { path: 'mode', component: ModeSelectionComponent },
       { path: 'room-list', component: RoomListComponent }, // New route for room list
+      { path: 'waiting-room', component: WaitingRoomComponent }, // New route for waiting room
       { path: 'player-setup', component: PlayerSetupComponent },
       { path: 'game-setup', component: GameSetupComponent },
       { path: 'play', component: QuizPlayComponent }, // パス名を'play'に変更

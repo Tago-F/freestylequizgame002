@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom, Subject } from 'rxjs'; // Subjectを追加
+import { Router } from '@angular/router'; // Routerを追加
 import { ApiService } from './api.service';
 import { WebSocketService } from './websocket.service';
 import { PlayerStateService } from './player-state.service';
@@ -14,6 +15,7 @@ export class QuizStateService {
   private webSocketService = inject(WebSocketService);
   private playerStateService = inject(PlayerStateService);
   private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
 
   // Signals for config data loaded from API
   public readonly genreCategories = signal<GenreCategory[]>([]);
@@ -31,6 +33,7 @@ export class QuizStateService {
   private isLoading = signal<boolean>(false); // Added missing isLoading
   private error = signal<string | null>(null); // Added missing error
   private _remainingTime = signal<number | null>(null);
+  private _hostPlayerId = signal<string | null>(null); // Keep track of host
 
   public answerResult$ = new Subject<AnswerResult>(); // 追加
 
@@ -46,6 +49,7 @@ export class QuizStateService {
   public readonly loading = this.isLoading.asReadonly();
   public readonly errorMessage = this.error.asReadonly();
   public readonly remainingTime = this._remainingTime.asReadonly();
+  public readonly hostPlayerId = this._hostPlayerId.asReadonly();
 
   // Computed signal to check if both genre and difficulty are selected
   public readonly isQuizConfigured = computed(() =>
@@ -123,6 +127,11 @@ export class QuizStateService {
     // Subscribe to game state updates
     this.webSocketService.watch('/topic/room/' + sessionId).subscribe(message => {
         const gameSession: GameSession = JSON.parse(message.body);
+        
+        if (gameSession.hostPlayerId) {
+            this._hostPlayerId.set(gameSession.hostPlayerId);
+        }
+
         if (gameSession.currentQuiz) {
             this.currentQuiz.set(gameSession.currentQuiz);
         }
@@ -132,6 +141,12 @@ export class QuizStateService {
         if (gameSession.players) {
             this.playerStateService.setPlayers(gameSession.players);
         }
+        if (gameSession.status === 'PLAYING') {
+             // Check if we are not already in play component to avoid loop/refresh issues if desired
+             if (!this.router.url.includes('/quiz/play')) {
+                 this.router.navigate(['/quiz/play']);
+             }
+        }
     });
 
     // Subscribe to answer results
@@ -140,47 +155,51 @@ export class QuizStateService {
       this.answerResult$.next(result);
     });
   }
-  
-  // New: Initialize online game
-  async initializeOnlineGame(players: Player[]): Promise<Player[] | null> {
-    const settings = this.getQuizConfigRequest();
-    if (!settings) {
-      this.error.set('Quiz configuration is incomplete.');
-      return null;
-    }
 
+  async hostGame(settings: GenerateQuizRequest, playerName: string, icon: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
-
     try {
-      // Step 1: Create Game Session
-      const sessionResponse = await firstValueFrom(this.apiService.createGameSession(settings));
-      this.currentSessionId.set(sessionResponse.sessionId);
-      const sessionId = sessionResponse.sessionId;
-
-      // Connect to WebSocket
-      this.connectToSession(sessionId);
-
-      // Step 2: Join Players
-      const joinPromises = players.map(player =>
-        firstValueFrom(this.apiService.joinGameSession(sessionId, player.name, player.icon))
-      );
-      
-      const joinedPlayers = await Promise.all(joinPromises);
-
-      // Step 3: Start Game
-      await firstValueFrom(this.apiService.startGame(sessionId));
-
-      // Fetch initial state is removed as WS should handle updates, but we return joinedPlayers as before.
-      return joinedPlayers;
-
+        const sessionResponse = await firstValueFrom(this.apiService.createGameSession(settings));
+        const sessionId = sessionResponse.sessionId;
+        this.currentSessionId.set(sessionId);
+        
+        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon));
+        this.playerStateService.setMyPlayerId(player.id);
+        
+        this.connectToSession(sessionId);
+        this.router.navigate(['/quiz/waiting-room']);
     } catch (err: any) {
-      this.error.set(err.message || 'Failed to initialize online game');
-      console.error('Online game initialization error:', err);
-      return null;
+        this.error.set(err.message || 'Failed to host game');
+        console.error('Host game error:', err);
     } finally {
-      this.isLoading.set(false);
+        this.isLoading.set(false);
     }
+  }
+
+  async joinGame(sessionId: string, playerName: string, icon: string): Promise<void> {
+    this.isLoading.set(true);
+    this.error.set(null);
+    try {
+        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon));
+        this.playerStateService.setMyPlayerId(player.id);
+        this.currentSessionId.set(sessionId);
+        
+        this.connectToSession(sessionId);
+        this.router.navigate(['/quiz/waiting-room']);
+    } catch (err: any) {
+        this.error.set(err.message || 'Failed to join game');
+        console.error('Join game error:', err);
+    } finally {
+        this.isLoading.set(false);
+    }
+  }
+  
+  // New: Initialize online game (Original local multiplayer initialization kept if needed, but updated logic above is preferred for online)
+  async initializeOnlineGame(players: Player[]): Promise<Player[] | null> {
+    // This method might be deprecated or used for local co-op setup, keeping for backward compatibility if needed
+    // But for strictly online rooms flow, we use hostGame/joinGame
+    return null;
   }
   
   async generateQuiz(): Promise<void> {

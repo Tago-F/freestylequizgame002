@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ApiService } from '../shared/api.service';
 import { QuizStateService } from '../shared/quiz-state.service';
+import { PlayerStateService } from '../shared/player-state.service'; // Added
 import { GameSession } from '../shared/quiz.model';
 
 @Component({
@@ -72,6 +73,7 @@ export class RoomListComponent implements OnInit {
   
   private apiService = inject(ApiService);
   private quizStateService = inject(QuizStateService);
+  private playerStateService = inject(PlayerStateService); // Added
   private router = inject(Router);
 
   ngOnInit() {
@@ -92,12 +94,17 @@ export class RoomListComponent implements OnInit {
     });
   }
 
-  joinRoom(session: GameSession) {
+  async joinRoom(session: GameSession) {
     console.log('Joining room:', session.sessionId);
-    this.quizStateService.setSessionId(session.sessionId);
-    // Proceed to player setup or waiting room
-    // Assuming player setup is needed first for name/icon
-    this.router.navigate(['/quiz/player-setup']);
+    // Use the first player info as "myself" (assuming set up in previous screen)
+    const me = this.playerStateService.playerList()[0];
+    if (me) {
+        await this.quizStateService.joinGame(session.sessionId, me.name, me.icon);
+    } else {
+        // Fallback or error if no player set up
+        console.error("No player information found. Please set up player profile.");
+        this.router.navigate(['/quiz/player-setup']);
+    }
   }
 
   goBack() {
