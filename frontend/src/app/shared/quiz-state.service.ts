@@ -253,6 +253,39 @@ export class QuizStateService {
       }
     }
 
+  async leaveGame(): Promise<void> {
+    const sessionId = this.currentSessionId();
+    const playerId = this.playerStateService.myPlayerId();
+    
+    if (sessionId && playerId) {
+        try {
+            await firstValueFrom(this.apiService.leaveSession(sessionId, playerId));
+        } catch (e) {
+            console.error('Error leaving session:', e);
+        }
+    }
+    
+    this.resetQuizState();
+    this.playerStateService.reset();
+    this.router.navigate(['/game-selection']);
+  }
+
+  async endGame(): Promise<void> {
+    const sessionId = this.currentSessionId();
+    
+    if (sessionId) {
+        try {
+            await firstValueFrom(this.apiService.endSession(sessionId));
+        } catch (e) {
+            console.error('Error ending session:', e);
+        }
+    }
+    
+    this.resetQuizState();
+    this.playerStateService.reset();
+    this.router.navigate(['/game-selection']);
+  }
+
   resetQuizState(): void {
     this.selectedGenre.set(null);
     this.selectedDifficulty.set('ふつう');

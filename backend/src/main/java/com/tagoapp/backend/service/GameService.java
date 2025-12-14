@@ -161,6 +161,35 @@ public class GameService {
         return result;
     }
 
+    public void leaveSession(String sessionId, String playerId) {
+        GameSession session = sessions.get(sessionId);
+        if (session == null) {
+            // Already gone or invalid, just ignore
+            return;
+        }
+
+        // Remove player
+        session.getPlayers().removeIf(p -> p.getId().equals(playerId));
+
+        // Check if session should be closed
+        if (session.getPlayers().isEmpty() || playerId.equals(session.getHostPlayerId())) {
+            endSession(sessionId);
+        } else {
+            // Broadcast update to remaining players
+            broadcastState(sessionId);
+        }
+    }
+
+    public void endSession(String sessionId) {
+        if (sessions.remove(sessionId) != null) {
+            stopCountdown(sessionId);
+            System.out.println("Session ended: " + sessionId);
+            // Optionally notify clients that session is ended/closed if needed, 
+            // but clients usually handle this via connection loss or specific message.
+            // Sending a final state with "FINISHED" or empty might be useful if not already done.
+        }
+    }
+
     private void broadcastState(String sessionId) {
         GameSession session = getSession(sessionId);
         template.convertAndSend("/topic/room/" + sessionId, session);

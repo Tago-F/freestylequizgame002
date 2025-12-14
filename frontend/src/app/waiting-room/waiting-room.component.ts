@@ -95,9 +95,10 @@ export class WaitingRoomComponent implements OnInit {
   }
 
   leaveRoom() {
-    // Ideally we should call an API to leave, but for now just navigate back
-    this.quizState.resetQuizState();
-    this.playerState.reset();
-    this.router.navigate(['/game-selection']);
+    if (this.isHost) {
+      this.quizState.endGame();
+    } else {
+      this.quizState.leaveGame();
+    }
   }
 }

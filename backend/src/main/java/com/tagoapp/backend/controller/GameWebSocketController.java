@@ -34,6 +34,6 @@ public class GameWebSocketController {
 
     @MessageMapping("/answer/{sessionId}")
     public void submitAnswer(@DestinationVariable String sessionId, GameController.AnswerRequest request) {
-        gameService.submitAnswer(sessionId, request.getPlayerId(), request.getAnswer());
+        gameService.submitAnswer(sessionId, request.getPlayerId(), request.getAnswer(), request.isUsedHint());
     }
 }

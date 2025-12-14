@@ -51,4 +51,12 @@ export class ApiService {
   nextQuestion(sessionId: string): Observable<QuizResponse> {
     return this.http.post<QuizResponse>(`${this.baseUrl}/game/${sessionId}/next`, {});
   }
+
+  leaveSession(sessionId: string, playerId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/game/${sessionId}/leave`, playerId);
+  }
+
+  endSession(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/game/${sessionId}/end`, {});
+  }
 }

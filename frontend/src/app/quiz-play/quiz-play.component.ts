@@ -265,9 +265,10 @@ export class QuizPlayComponent implements OnInit {
   }
 
   leaveGame() {
-      // Logic to leave game
-      this.quizState.resetQuizState();
-      this.playerState.reset();
-      this.router.navigate(['/game-selection']);
+      if (this.isHost) {
+          this.quizState.endGame();
+      } else {
+          this.quizState.leaveGame();
+      }
   }
 }

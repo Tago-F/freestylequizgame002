@@ -71,6 +71,20 @@ public class GameController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/{sessionId}/leave")
+    public ResponseEntity<Void> leaveSession(
+            @PathVariable String sessionId,
+            @RequestBody String playerId) {
+        gameService.leaveSession(sessionId, playerId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{sessionId}/end")
+    public ResponseEntity<Void> endSession(@PathVariable String sessionId) {
+        gameService.endSession(sessionId);
+        return ResponseEntity.ok().build();
+    }
+
     // Request DTOs
     public static class JoinRequest {
         private String playerName;

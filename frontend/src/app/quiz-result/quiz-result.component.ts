@@ -116,10 +116,16 @@ export class QuizResultComponent {
     // Sort players by score in descending order
     return [...this.playerState.playerList()].sort((a, b) => b.score - a.score);
   });
+  
+  get isHost(): boolean {
+      return this.quizState.hostPlayerId() === this.playerState.myPlayerId();
+  }
 
   leaveGame(): void {
-    this.playerState.reset();
-    this.quizState.resetQuizState();
-    this.router.navigate(['/game-selection']);
+    if (this.isHost) {
+        this.quizState.endGame();
+    } else {
+        this.quizState.leaveGame();
+    }
   }
 }
