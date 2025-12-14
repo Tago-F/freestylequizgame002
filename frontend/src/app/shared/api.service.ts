@@ -39,6 +39,10 @@ export class ApiService {
   getGameSession(sessionId: string): Observable<GameSession> {
     return this.http.get<GameSession>(`${this.baseUrl}/game/${sessionId}`);
   }
+  
+  getAvailableSessions(): Observable<GameSession[]> {
+    return this.http.get<GameSession[]>(`${this.baseUrl}/game/sessions`);
+  }
 
   submitAnswer(sessionId: string, playerId: string, answer: string): Observable<AnswerResult> {
     return this.http.post<AnswerResult>(`${this.baseUrl}/game/${sessionId}/answer`, { playerId, answer });

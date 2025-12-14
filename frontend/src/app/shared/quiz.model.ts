@@ -2,6 +2,8 @@ export interface GenerateQuizRequest {
   genre: string;
   difficulty: string;
   timeLimit?: number | null;
+  roomName?: string;
+  password?: string;
 }
 
 export interface QuizResponse {
@@ -62,9 +64,12 @@ export interface AnswerResult {
 
 export interface GameSession {
   sessionId: string;
+  hostPlayerId: string;
+  roomName: string;
   players: Player[];
   status: GameStatus;
   currentTurnIndex: number;
+  settings: GenerateQuizRequest;
   currentQuiz?: QuizResponse;
   remainingTime: number;
 }

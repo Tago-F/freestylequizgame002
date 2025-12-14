@@ -77,6 +77,10 @@ export class QuizStateService {
     this.selectedDifficulty.set(difficulty);
   }
 
+  setSessionId(sessionId: string): void {
+    this.currentSessionId.set(sessionId);
+  }
+
   // New: Set time limit
   setTimeLimit(seconds: number | null): void {
     this.selectedTimeLimit.set(seconds);
