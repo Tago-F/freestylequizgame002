@@ -28,8 +28,8 @@ export class ApiService {
     return this.http.post<{sessionId: string}>(`${this.baseUrl}/game/create`, settings);
   }
 
-  joinGameSession(sessionId: string, playerName: string, icon: string): Observable<Player> {
-    return this.http.post<Player>(`${this.baseUrl}/game/${sessionId}/join`, { playerName, icon });
+  joinGameSession(sessionId: string, playerName: string, icon: string, password?: string): Observable<Player> {
+    return this.http.post<Player>(`${this.baseUrl}/game/${sessionId}/join`, { playerName, icon, password });
   }
 
   startGame(sessionId: string): Observable<void> {

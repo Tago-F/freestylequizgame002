@@ -67,13 +67,17 @@ export interface AnswerResult {
 }
 
 export interface GameSession {
-  sessionId: string;
-  hostPlayerId: string;
-  roomName: string;
-  players: Player[];
-  status: GameStatus;
-  currentTurnIndex: number;
-  settings: GenerateQuizRequest;
-  currentQuiz?: QuizResponse;
-  remainingTime: number;
+    sessionId: string;
+    roomName: string;
+    hostPlayerId: string;
+    players: Player[];
+    status: 'WAITING' | 'PLAYING' | 'FINISHED';
+    currentTurnIndex: number;
+    settings: GenerateQuizRequest;
+    currentQuiz?: QuizResponse;
+    remainingTime?: number;
+    hasPassword?: boolean;
+    gameStarted: boolean;
+    currentQuestionCount: number;
+    private: boolean;
 }

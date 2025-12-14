@@ -19,7 +19,7 @@ public class GameWebSocketController {
 
     @MessageMapping("/join/{sessionId}")
     public void joinSession(@DestinationVariable String sessionId, GameController.JoinRequest request) {
-        gameService.joinSession(sessionId, request.getPlayerName(), request.getIcon());
+        gameService.joinSession(sessionId, request.getPlayerName(), request.getIcon(), request.getPassword());
     }
 
     @MessageMapping("/start/{sessionId}")

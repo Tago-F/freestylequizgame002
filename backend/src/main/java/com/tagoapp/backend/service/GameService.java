@@ -41,10 +41,16 @@ public class GameService {
         return sessionId;
     }
 
-    public Player joinSession(String sessionId, String playerName, String icon) {
+    public Player joinSession(String sessionId, String playerName, String icon, String password) {
         GameSession session = sessions.get(sessionId);
         if (session == null) {
             throw new IllegalArgumentException("Session not found: " + sessionId);
+        }
+
+        if (session.getPassword() != null && !session.getPassword().isEmpty()) {
+            if (password == null || !session.getPassword().equals(password)) {
+                throw new IllegalArgumentException("Invalid password");
+            }
         }
 
         String playerId = UUID.randomUUID().toString();

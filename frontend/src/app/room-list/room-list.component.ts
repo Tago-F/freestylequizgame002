@@ -4,16 +4,25 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ApiService } from '../shared/api.service';
 import { QuizStateService } from '../shared/quiz-state.service';
 import { PlayerStateService } from '../shared/player-state.service'; // Added
 import { GameSession } from '../shared/quiz.model';
+import { PasswordDialogComponent } from './password-dialog/password-dialog.component';
 
 @Component({
   selector: 'app-room-list',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatListModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule, 
+    MatCardModule, 
+    MatListModule, 
+    MatButtonModule, 
+    MatIconModule,
+    MatDialogModule
+  ],
   template: `
     <div class="room-list-container">
       <h2>Select a Room to Join</h2>
@@ -28,7 +37,10 @@ import { GameSession } from '../shared/quiz.model';
 
       <mat-card *ngFor="let session of sessions" class="room-card">
         <mat-card-header>
-          <mat-card-title>{{ session.roomName || 'Untitled Room' }}</mat-card-title>
+          <mat-card-title>
+            {{ session.roomName || 'Untitled Room' }}
+            <mat-icon *ngIf="session.hasPassword" class="lock-icon" title="Password Protected">lock</mat-icon>
+          </mat-card-title>
           <mat-card-subtitle>Host ID: {{ session.hostPlayerId }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
@@ -65,6 +77,14 @@ import { GameSession } from '../shared/quiz.model';
       margin-top: 1rem;
       text-align: center;
     }
+    .lock-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+      vertical-align: middle;
+      margin-left: 0.5rem;
+      color: #757575;
+    }
   `]
 })
 export class RoomListComponent implements OnInit {
@@ -75,6 +95,7 @@ export class RoomListComponent implements OnInit {
   private quizStateService = inject(QuizStateService);
   private playerStateService = inject(PlayerStateService); // Added
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   ngOnInit() {
     this.loadSessions();
@@ -95,15 +116,27 @@ export class RoomListComponent implements OnInit {
   }
 
   async joinRoom(session: GameSession) {
-    console.log('Joining room:', session.sessionId);
-    // Use the first player info as "myself" (assuming set up in previous screen)
     const me = this.playerStateService.playerList()[0];
-    if (me) {
-        await this.quizStateService.joinGame(session.sessionId, me.name, me.icon);
-    } else {
-        // Fallback or error if no player set up
+    if (!me) {
         console.error("No player information found. Please set up player profile.");
         this.router.navigate(['/quiz/player-setup']);
+        return;
+    }
+
+    if (session.hasPassword) {
+      const dialogRef = this.dialog.open(PasswordDialogComponent);
+      dialogRef.afterClosed().subscribe(async (password) => {
+        if (password) {
+          try {
+            await this.quizStateService.joinGame(session.sessionId, me.name, me.icon, password);
+          } catch (e) {
+            alert('Failed to join: Invalid Password or Room Full');
+          }
+        }
+      });
+    } else {
+      console.log('Joining room:', session.sessionId);
+      await this.quizStateService.joinGame(session.sessionId, me.name, me.icon);
     }
   }
 

@@ -1,5 +1,6 @@
 package com.tagoapp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tagoapp.backend.dto.GenerateQuizRequest;
 import com.tagoapp.backend.dto.QuizResponse;
 
@@ -16,6 +17,7 @@ public class GameSession {
     private Integer remainingTime;
     private String hostPlayerId;
     private String roomName;
+    @JsonIgnore
     private String password;
     private boolean isGameStarted;
     private int currentQuestionCount;
@@ -36,6 +38,10 @@ public class GameSession {
 
     public void addPlayer(Player player) {
         this.players.add(player);
+    }
+
+    public boolean isHasPassword() {
+        return this.password != null && !this.password.isEmpty();
     }
 
     public String getSessionId() {

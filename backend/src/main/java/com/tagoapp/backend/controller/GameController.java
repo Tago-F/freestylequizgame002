@@ -41,7 +41,7 @@ public class GameController {
     public ResponseEntity<Player> joinSession(
             @PathVariable String sessionId,
             @RequestBody JoinRequest request) {
-        Player player = gameService.joinSession(sessionId, request.getPlayerName(), request.getIcon());
+        Player player = gameService.joinSession(sessionId, request.getPlayerName(), request.getIcon(), request.getPassword());
         return ResponseEntity.ok(player);
     }
 
@@ -89,6 +89,7 @@ public class GameController {
     public static class JoinRequest {
         private String playerName;
         private String icon;
+        private String password;
 
         public String getPlayerName() {
             return playerName;
@@ -104,6 +105,14 @@ public class GameController {
 
         public void setIcon(String icon) {
             this.icon = icon;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 

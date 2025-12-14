@@ -192,11 +192,11 @@ export class QuizStateService {
     }
   }
 
-  async joinGame(sessionId: string, playerName: string, icon: string): Promise<void> {
+  async joinGame(sessionId: string, playerName: string, icon: string, password?: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon));
+        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon, password));
         this.playerStateService.setMyPlayerId(player.id);
         this.currentSessionId.set(sessionId);
         
@@ -205,6 +205,8 @@ export class QuizStateService {
     } catch (err: any) {
         this.error.set(err.message || 'Failed to join game');
         console.error('Join game error:', err);
+        // Rethrow or handle error to let UI know
+        throw err;
     } finally {
         this.isLoading.set(false);
     }
