@@ -32,7 +32,7 @@ import { GameSession } from '../shared/quiz.model';
           <mat-card-subtitle>Host ID: {{ session.hostPlayerId }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Genre: {{ session.settings?.genre || 'Random' }}</p>
+          <p>Genre: {{ session.settings.genre || 'Random' }}</p>
           <p>Players: {{ session.players.length }}</p>
         </mat-card-content>
         <mat-card-actions align="end">
