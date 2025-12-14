@@ -1,10 +1,10 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs'; // Subjectを追加
 import { ApiService } from './api.service';
 import { WebSocketService } from './websocket.service';
 import { PlayerStateService } from './player-state.service';
-import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player, GameSession } from './quiz.model';
+import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player, GameSession, AnswerResult } from './quiz.model'; // AnswerResultも追加
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +31,8 @@ export class QuizStateService {
   private isLoading = signal<boolean>(false); // Added missing isLoading
   private error = signal<string | null>(null); // Added missing error
   private _remainingTime = signal<number | null>(null);
+
+  public answerResult$ = new Subject<AnswerResult>(); // 追加
 
   // Public signals for components to read
   public readonly genre = this.selectedGenre.asReadonly();
@@ -113,6 +115,8 @@ export class QuizStateService {
 
   connectToSession(sessionId: string): void {
     this.webSocketService.connect();
+    
+    // Subscribe to game state updates
     this.webSocketService.watch('/topic/room/' + sessionId).subscribe(message => {
         const gameSession: GameSession = JSON.parse(message.body);
         if (gameSession.currentQuiz) {
@@ -124,6 +128,12 @@ export class QuizStateService {
         if (gameSession.players) {
             this.playerStateService.setPlayers(gameSession.players);
         }
+    });
+
+    // Subscribe to answer results
+    this.webSocketService.watch('/topic/room/' + sessionId + '/result').subscribe(message => {
+      const result: AnswerResult = JSON.parse(message.body);
+      this.answerResult$.next(result);
     });
   }
   

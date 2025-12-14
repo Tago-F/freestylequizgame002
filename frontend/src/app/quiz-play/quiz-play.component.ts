@@ -74,6 +74,20 @@ export class QuizPlayComponent implements OnInit {
     } else {
       this.viewState.set('loading');
     }
+
+    // Subscribe to answer results from QuizStateService
+    this.quizState.answerResult$.subscribe(result => {
+      this.isCorrect.set(result.correct);
+      this.correctAnswer.set(result.correctAnswer);
+      
+      // Update score using the new score from the result
+      const currentPlayer = this.playerState.currentPlayer();
+      if (currentPlayer) { // Check if current player exists (for safety)
+         this.playerState.updatePlayerScore(currentPlayer.id, result.newScore);
+      }
+
+      this.viewState.set('answer'); // Switch to answer display mode
+    });
   }
 
   fetchNewQuiz(): void {
