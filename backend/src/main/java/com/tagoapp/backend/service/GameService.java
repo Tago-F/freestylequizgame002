@@ -51,9 +51,19 @@ public class GameService {
         Player player = new Player(playerId, playerName, icon);
         session.addPlayer(player);
         
+        if (session.getPlayers().size() == 1) {
+            session.setHostPlayerId(player.getId());
+        }
+
         broadcastState(sessionId);
         
         return player;
+    }
+
+    public List<GameSession> getAvailableSessions() {
+        return sessions.values().stream()
+                .filter(session -> !session.isGameStarted())
+                .toList();
     }
 
     public GameSession getSession(String sessionId) {
@@ -67,6 +77,7 @@ public class GameService {
     public void startGame(String sessionId) {
         GameSession session = getSession(sessionId);
         session.setStatus(GameStatus.PLAYING);
+        session.setGameStarted(true);
         
         QuizResponse quiz = quizService.generateQuiz(session.getSettings());
         session.setCurrentQuiz(quiz);

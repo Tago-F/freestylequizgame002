@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,6 +29,12 @@ public class GameController {
     public ResponseEntity<Map<String, String>> createSession(@RequestBody GenerateQuizRequest request) {
         String sessionId = gameService.createSession(request);
         return ResponseEntity.ok(Collections.singletonMap("sessionId", sessionId));
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<List<GameSession>> getAvailableSessions() {
+        List<GameSession> sessions = gameService.getAvailableSessions();
+        return ResponseEntity.ok(sessions);
     }
 
     @PostMapping("/{sessionId}/join")

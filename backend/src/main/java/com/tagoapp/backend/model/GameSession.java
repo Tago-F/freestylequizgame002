@@ -14,6 +14,10 @@ public class GameSession {
     private GenerateQuizRequest settings;
     private QuizResponse currentQuiz;
     private Integer remainingTime;
+    private String hostPlayerId;
+    private String roomName;
+    private String password;
+    private boolean isGameStarted;
 
     public GameSession(String sessionId, GenerateQuizRequest settings) {
         this.sessionId = sessionId;
@@ -21,6 +25,9 @@ public class GameSession {
         this.status = GameStatus.WAITING;
         this.currentTurnIndex = 0;
         this.settings = settings;
+        this.roomName = settings.getRoomName();
+        this.password = settings.getPassword();
+        this.isGameStarted = false;
     }
 
     public void addPlayer(Player player) {
@@ -81,5 +88,37 @@ public class GameSession {
 
     public void setRemainingTime(Integer remainingTime) {
         this.remainingTime = remainingTime;
+    }
+
+    public String getHostPlayerId() {
+        return hostPlayerId;
+    }
+
+    public void setHostPlayerId(String hostPlayerId) {
+        this.hostPlayerId = hostPlayerId;
+    }
+
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isGameStarted() {
+        return isGameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        isGameStarted = gameStarted;
     }
 }
