@@ -106,6 +106,10 @@ export class ModeSelectionComponent {
 
   selectMode(mode: PlayMode): void {
     this.quizState.setPlayMode(mode);
-    this.router.navigate(['/quiz/player-setup']);
+    if (mode === 'SOLO') {
+      this.router.navigate(['/quiz/game-setup']);
+    } else {
+      this.router.navigate(['/quiz/player-setup']);
+    }
   }
 }

@@ -62,7 +62,7 @@ public class GameService {
 
     public List<GameSession> getAvailableSessions() {
         return sessions.values().stream()
-                .filter(session -> !session.isGameStarted())
+                .filter(session -> !session.isGameStarted() && !session.isPrivate())
                 .toList();
     }
 

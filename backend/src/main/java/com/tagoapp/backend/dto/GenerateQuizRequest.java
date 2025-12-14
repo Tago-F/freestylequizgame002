@@ -7,6 +7,7 @@ public class GenerateQuizRequest {
     private String roomName;
     private String password;
     private Integer numberOfQuestions;
+    private boolean isPrivate;
 
     // Getters and Setters
     public String getGenre() {
@@ -55,5 +56,13 @@ public class GenerateQuizRequest {
 
     public void setNumberOfQuestions(Integer numberOfQuestions) {
         this.numberOfQuestions = numberOfQuestions;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 }

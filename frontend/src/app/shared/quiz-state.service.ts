@@ -120,13 +120,15 @@ export class QuizStateService {
     const difficulty = this.selectedDifficulty();
     const timeLimit = this.selectedTimeLimit(); // Get time limit
     const numberOfQuestions = this.numberOfQuestions();
+    const isPrivate = this.currentPlayMode() === 'SOLO';
 
     if (genre && difficulty) {
       return {
         genre,
         difficulty,
         timeLimit, // Include time limit
-        numberOfQuestions
+        numberOfQuestions,
+        isPrivate
       };
     }
     return null;

@@ -19,6 +19,7 @@ public class GameSession {
     private String password;
     private boolean isGameStarted;
     private int currentQuestionCount;
+    private boolean isPrivate;
 
     public GameSession(String sessionId, GenerateQuizRequest settings) {
         this.sessionId = sessionId;
@@ -30,6 +31,7 @@ public class GameSession {
         this.password = settings.getPassword();
         this.isGameStarted = false;
         this.currentQuestionCount = 1;
+        this.isPrivate = settings.isPrivate();
     }
 
     public void addPlayer(Player player) {
@@ -130,5 +132,13 @@ public class GameSession {
 
     public void setCurrentQuestionCount(int currentQuestionCount) {
         this.currentQuestionCount = currentQuestionCount;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 }

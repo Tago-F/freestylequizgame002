@@ -5,6 +5,7 @@ export interface GenerateQuizRequest {
   roomName?: string;
   password?: string;
   numberOfQuestions?: number;
+  isPrivate?: boolean;
 }
 
 export type PlayMode = 'SOLO' | 'HOST' | 'GUEST';
