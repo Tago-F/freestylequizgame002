@@ -132,6 +132,7 @@ public class GameService {
         // For now, I will NOT stop the timer on answer submission, assuming "nextQuestion" will stop it.
         
         broadcastState(sessionId);
+        template.convertAndSend("/topic/room/" + sessionId + "/result", result);
         
         return result;
     }
