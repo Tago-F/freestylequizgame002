@@ -111,11 +111,14 @@ export class QuizStateService {
     const genre = this.selectedGenre();
     const difficulty = this.selectedDifficulty();
     const timeLimit = this.selectedTimeLimit(); // Get time limit
+    const numberOfQuestions = this.numberOfQuestions();
+
     if (genre && difficulty) {
       return {
         genre,
         difficulty,
-        timeLimit // Include time limit
+        timeLimit, // Include time limit
+        numberOfQuestions
       };
     }
     return null;
@@ -146,6 +149,8 @@ export class QuizStateService {
              if (!this.router.url.includes('/quiz/play')) {
                  this.router.navigate(['/quiz/play']);
              }
+        } else if (gameSession.status === 'FINISHED') {
+             this.router.navigate(['/quiz/result']);
         }
     });
 

@@ -92,6 +92,18 @@ public class GameService {
             throw new IllegalStateException("Game is not in PLAYING state.");
         }
 
+        int currentCount = session.getCurrentQuestionCount();
+        Integer maxQuestions = session.getSettings().getNumberOfQuestions();
+
+        if (maxQuestions != null && currentCount >= maxQuestions) {
+            session.setStatus(GameStatus.FINISHED);
+            stopCountdown(sessionId);
+            broadcastState(sessionId);
+            return null;
+        }
+        
+        session.setCurrentQuestionCount(currentCount + 1);
+
         QuizResponse quiz = quizService.generateQuiz(session.getSettings());
         session.setCurrentQuiz(quiz);
 
@@ -101,7 +113,7 @@ public class GameService {
         return quiz;
     }
 
-    public AnswerResult submitAnswer(String sessionId, String playerId, String answer) {
+    public AnswerResult submitAnswer(String sessionId, String playerId, String answer, boolean usedHint) {
         GameSession session = getSession(sessionId);
         
         if (session.getStatus() != GameStatus.PLAYING) {
@@ -122,8 +134,9 @@ public class GameService {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found: " + playerId));
 
         if (isCorrect) {
-            // スコア加算ロジック (例: 10点加算)
-            player.setScore(player.getScore() + 10);
+            // スコア加算ロジック
+            int points = usedHint ? 5 : 10;
+            player.setScore(player.getScore() + points);
         }
         newScore = player.getScore();
 

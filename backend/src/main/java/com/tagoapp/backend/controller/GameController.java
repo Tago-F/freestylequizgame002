@@ -67,7 +67,7 @@ public class GameController {
     public ResponseEntity<AnswerResult> submitAnswer(
             @PathVariable String sessionId,
             @RequestBody AnswerRequest request) {
-        AnswerResult result = gameService.submitAnswer(sessionId, request.getPlayerId(), request.getAnswer());
+        AnswerResult result = gameService.submitAnswer(sessionId, request.getPlayerId(), request.getAnswer(), request.isUsedHint());
         return ResponseEntity.ok(result);
     }
 
@@ -96,6 +96,7 @@ public class GameController {
     public static class AnswerRequest {
         private String playerId;
         private String answer;
+        private boolean usedHint;
 
         public String getPlayerId() {
             return playerId;
@@ -111,6 +112,14 @@ public class GameController {
 
         public void setAnswer(String answer) {
             this.answer = answer;
+        }
+
+        public boolean isUsedHint() {
+            return usedHint;
+        }
+
+        public void setUsedHint(boolean usedHint) {
+            this.usedHint = usedHint;
         }
     }
 }

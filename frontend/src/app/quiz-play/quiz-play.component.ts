@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { PlayerStateService } from '../shared/player-state.service';
 import { QuizStateService } from '../shared/quiz-state.service';
 import { ApiService } from '../shared/api.service';
-import { WebSocketService } from '../shared/websocket.service';
 
 // Angular Material Imports
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -12,10 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { QuizResultModal } from './quiz-result-modal/quiz-result-modal';
-
-type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-quiz-play',
@@ -27,153 +23,251 @@ type ViewState = 'loading' | 'quiz' | 'answer' | 'error';
     MatCardModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatDialogModule
+    MatChipsModule
   ],
-  templateUrl: './quiz-play.component.html',
-  styleUrls: ['./quiz-play.component.css']
+  template: `
+    <div class="game-container">
+      <mat-toolbar color="primary" class="toolbar">
+        <span>Room: {{ quizState.sessionId() }}</span>
+        <span class="spacer"></span>
+        <span *ngIf="quizState.remainingTime() !== null" class="timer">
+          Time: {{ quizState.remainingTime() }}s
+        </span>
+      </mat-toolbar>
+
+      <div class="content">
+        <!-- Loading State -->
+        <div *ngIf="quizState.loading()" class="center-content">
+          <mat-spinner></mat-spinner>
+          <p>Loading...</p>
+        </div>
+
+        <!-- Quiz Question State -->
+        <div *ngIf="!quizState.loading() && !showResult && quizState.quiz()" class="quiz-content">
+          <mat-card class="question-card">
+            <mat-card-header>
+              <mat-card-title>Question {{ quizState.questionIndex() + 1 }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="question-text">{{ quizState.quiz()?.question }}</p>
+              
+              <div *ngIf="quizState.hint()" class="hint-box">
+                <strong>Hint:</strong> {{ quizState.hint()?.hint }}
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+               <button mat-button color="accent" (click)="getHint()" [disabled]="hasUsedHint || quizState.loading()">
+                 <mat-icon>lightbulb</mat-icon> Use Hint
+               </button>
+            </mat-card-actions>
+          </mat-card>
+
+          <div class="options-grid">
+            <button *ngFor="let option of quizState.quiz()?.options"
+                    mat-raised-button
+                    class="option-btn"
+                    (click)="submitAnswer(option)"
+                    [disabled]="hasSubmitted">
+              {{ option }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Result State -->
+        <div *ngIf="showResult" class="result-content">
+           <mat-card [ngClass]="{'correct-card': isCorrect, 'incorrect-card': !isCorrect}">
+             <mat-card-header>
+               <mat-card-title>
+                 <mat-icon>{{ isCorrect ? 'check_circle' : 'cancel' }}</mat-icon>
+                 {{ isCorrect ? 'Correct!' : 'Incorrect' }}
+               </mat-card-title>
+             </mat-card-header>
+             <mat-card-content>
+               <p><strong>Correct Answer:</strong> {{ correctAnswer }}</p>
+               <p *ngIf="quizState.quiz()?.explanation">
+                 <strong>Explanation:</strong> {{ quizState.quiz()?.explanation }}
+               </p>
+               <div class="score-update">
+                  Current Score: {{ playerState.currentPlayer()?.score }}
+               </div>
+             </mat-card-content>
+             <mat-card-actions *ngIf="isHost">
+               <button mat-raised-button color="primary" (click)="nextQuestion()">Next Question</button>
+             </mat-card-actions>
+             <mat-card-actions *ngIf="!isHost">
+               <p>Waiting for host...</p>
+             </mat-card-actions>
+           </mat-card>
+        </div>
+
+        <!-- Players List (Sidebar or Bottom) -->
+        <div class="players-section">
+          <h3>Players</h3>
+          <mat-chip-listbox>
+            <mat-chip *ngFor="let p of playerState.playerList()" [highlighted]="p.id === playerState.myPlayerId()">
+                {{ p.icon }} {{ p.name }}: {{ p.score }}
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+        
+        <div class="footer-actions">
+            <button mat-button color="warn" (click)="leaveGame()">Leave Game</button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .game-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .spacer {
+      flex: 1 1 auto;
+    }
+    .timer {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .content {
+      padding: 1rem;
+      flex: 1;
+      overflow-y: auto;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .center-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+    }
+    .question-card {
+      margin-bottom: 2rem;
+    }
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin: 1rem 0;
+    }
+    .hint-box {
+      background: #fff3e0;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .option-btn {
+      height: 60px;
+      font-size: 1.1rem;
+    }
+    .correct-card {
+      background-color: #e8f5e9;
+    }
+    .incorrect-card {
+      background-color: #ffebee;
+    }
+    .players-section {
+      margin-top: 2rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+    .footer-actions {
+        margin-top: 1rem;
+        text-align: center;
+    }
+  `]
 })
 export class QuizPlayComponent implements OnInit {
-  viewState = signal<ViewState>('loading');
-  selectedAnswer = signal<string | null>(null);
-  errorMessage = signal<string | null>(null);
-  // Additional signal to show correct answer from server
-  correctAnswer = signal<string | null>(null);
-  isCorrect = signal<boolean>(false);
+  hasUsedHint = false;
+  hasSubmitted = false;
+  showResult = false;
+  isCorrect = false;
+  correctAnswer = '';
 
-  infinity = Infinity;
+  private apiService = inject(ApiService);
+  public quizState = inject(QuizStateService);
+  public playerState = inject(PlayerStateService);
+  private router = inject(Router);
 
-  private webSocketService = inject(WebSocketService);
+  get isHost(): boolean {
+    return this.quizState.hostPlayerId() === this.playerState.myPlayerId();
+  }
 
-  constructor(
-    public playerState: PlayerStateService,
-    public quizState: QuizStateService,
-    private apiService: ApiService,
-    private router: Router,
-    public dialog: MatDialog
-  ) {
+  constructor() {
     effect(() => {
-      const quiz = this.quizState.quiz();
-      if (quiz) {
-        this.viewState.set('quiz');
-      }
+       // Reset state when new quiz arrives
+       if (this.quizState.quiz()) {
+           this.hasUsedHint = false;
+           this.hasSubmitted = false;
+           this.showResult = false;
+       }
+       
+       // Handle timer expiration
+       if (this.quizState.remainingTime() === 0 && !this.showResult) {
+           // Time up handling, maybe switch to result view if not already
+           // Ideally backend sends result or we just show timeout
+       }
     });
   }
 
   ngOnInit(): void {
-    const sessionId = this.quizState.sessionId();
-    if (!sessionId) {
-      // If no session, try to redirect or handle error. 
-      // For now, redirect to setup.
-      this.router.navigate(['/quiz/game-setup']);
+    if (!this.quizState.sessionId()) {
+      this.router.navigate(['/game-selection']);
       return;
     }
 
-    // Initial check: if quiz is already loaded in service
-    if (this.quizState.quiz()) {
-      this.viewState.set('quiz');
-    } else {
-      this.viewState.set('loading');
-    }
-
-    // Subscribe to answer results from QuizStateService
+    // Subscribe to result updates
     this.quizState.answerResult$.subscribe(result => {
-      this.isCorrect.set(result.correct);
-      this.correctAnswer.set(result.correctAnswer);
-      
-      // Update score using the new score from the result
-      const currentPlayer = this.playerState.currentPlayer();
-      if (currentPlayer) { // Check if current player exists (for safety)
-         this.playerState.updatePlayerScore(currentPlayer.id, result.newScore);
-      }
-
-      this.viewState.set('answer'); // Switch to answer display mode
+        this.isCorrect = result.correct;
+        this.correctAnswer = result.correctAnswer;
+        this.showResult = true;
+        
+        // Update score in local state
+        // Note: Ideally backend broadcasts updated player list, which updates playerState automatically via WebSocket
+        // But we can also update locally for immediate feedback if needed, 
+        // though playerStateService.setPlayers() is called by WS updates in QuizStateService.
     });
   }
 
-  fetchNewQuiz(): void {
-    const sessionId = this.quizState.sessionId();
-    if (!sessionId) return;
+  getHint() {
+    this.hasUsedHint = true;
+    this.quizState.generateHint();
+  }
 
-    if (this.quizState.questionIndex() >= this.quizState.totalQuestions()) {
-      this.openQuizResultModal();
-      return;
+  submitAnswer(answer: string) {
+    if (this.hasSubmitted) return;
+    this.hasSubmitted = true;
+    
+    const sessionId = this.quizState.sessionId();
+    const playerId = this.playerState.myPlayerId();
+    
+    if (sessionId && playerId) {
+        this.apiService.submitAnswer(sessionId, playerId, answer, this.hasUsedHint).subscribe({
+            error: (err) => console.error("Submit answer failed", err)
+        });
     }
-
-    this.viewState.set('loading');
-    this.selectedAnswer.set(null);
-    this.correctAnswer.set(null);
-    this.quizState.setCurrentHint(null);
-
-    this.webSocketService.publish('/app/start/' + sessionId, {});
   }
 
-  selectAnswer(option: string): void {
-    if (this.viewState() !== 'quiz') return;
-    
-    const sessionId = this.quizState.sessionId();
-    const currentPlayer = this.playerState.currentPlayer();
-    
-    if (!sessionId || !currentPlayer) return;
-
-    this.selectedAnswer.set(option);
-    this.viewState.set('loading'); // Wait for server update
-
-    this.webSocketService.publish('/app/answer/' + sessionId, {
-      playerId: currentPlayer.id,
-      answer: option
-    });
-  }
-
-  fetchHint(): void {
-    const currentQuiz = this.quizState.quiz();
-    if (!currentQuiz) return;
-
-    this.viewState.set('loading');
-    this.apiService.generateHint({
-      question: currentQuiz.question,
-      options: currentQuiz.options
-    }).subscribe({
-      next: (hint) => {
-        this.quizState.setCurrentHint(hint);
-        this.viewState.set('quiz');
-      },
-      error: (err) => {
-        console.error('Hint generation failed:', err);
-        this.handleError('ヒントの生成に失敗しました。');
+  nextQuestion() {
+      const sessionId = this.quizState.sessionId();
+      if (sessionId) {
+          this.apiService.nextQuestion(sessionId).subscribe({
+              error: (err) => console.error("Next question failed", err)
+          });
       }
-    });
   }
 
-  adjustScore(playerId: string, amount: number): void {
-    this.playerState.adjustScore(playerId, amount);
-  }
-
-  addUser(): void {
-    // In online mode, adding users mid-game might be restricted or different.
-    // For now, keep navigating but it might break the session flow.
-    this.router.navigate(['/quiz/player-setup']);
-  }
-
-  resetGame(): void {
-    this.playerState.reset();
-    this.quizState.resetQuizState();
-    this.router.navigate(['/quiz/player-setup']);
-  }
-
-  backToSettings(): void {
-    this.quizState.resetQuizState();
-    this.router.navigate(['/quiz/game-setup']);
-  }
-
-  openQuizResultModal(): void {
-    this.dialog.open(QuizResultModal, {
-      width: '350px',
-      disableClose: true
-    });
-  }
-
-  private handleError(message: string): void {
-    this.errorMessage.set(message);
-    this.viewState.set('error');
+  leaveGame() {
+      // Logic to leave game
+      this.quizState.resetQuizState();
+      this.playerState.reset();
+      this.router.navigate(['/game-selection']);
   }
 }

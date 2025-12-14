@@ -4,6 +4,7 @@ export interface GenerateQuizRequest {
   timeLimit?: number | null;
   roomName?: string;
   password?: string;
+  numberOfQuestions?: number;
 }
 
 export interface QuizResponse {

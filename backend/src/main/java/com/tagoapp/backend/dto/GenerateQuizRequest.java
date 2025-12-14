@@ -6,6 +6,7 @@ public class GenerateQuizRequest {
     private Integer timeLimit;
     private String roomName;
     private String password;
+    private Integer numberOfQuestions;
 
     // Getters and Setters
     public String getGenre() {
@@ -46,5 +47,13 @@ public class GenerateQuizRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getNumberOfQuestions() {
+        return numberOfQuestions;
+    }
+
+    public void setNumberOfQuestions(Integer numberOfQuestions) {
+        this.numberOfQuestions = numberOfQuestions;
     }
 }
