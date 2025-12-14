@@ -5,7 +5,7 @@ import { Router } from '@angular/router'; // Routerを追加
 import { ApiService } from './api.service';
 import { WebSocketService } from './websocket.service';
 import { PlayerStateService } from './player-state.service';
-import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player, GameSession, AnswerResult } from './quiz.model'; // AnswerResultも追加
+import { GenerateQuizRequest, QuizResponse, HintResponse, GenreCategory, GameModeItem, Player, GameSession, AnswerResult, PlayMode } from './quiz.model'; // AnswerResultも追加
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +34,8 @@ export class QuizStateService {
   private error = signal<string | null>(null); // Added missing error
   private _remainingTime = signal<number | null>(null);
   private _hostPlayerId = signal<string | null>(null); // Keep track of host
+  
+  private currentPlayMode = signal<PlayMode>('SOLO'); // New: Play mode signal
 
   public answerResult$ = new Subject<AnswerResult>(); // 追加
 
@@ -50,6 +52,8 @@ export class QuizStateService {
   public readonly errorMessage = this.error.asReadonly();
   public readonly remainingTime = this._remainingTime.asReadonly();
   public readonly hostPlayerId = this._hostPlayerId.asReadonly();
+  
+  public readonly playMode = this.currentPlayMode.asReadonly(); // Public play mode signal
 
   // Computed signal to check if both genre and difficulty are selected
   public readonly isQuizConfigured = computed(() =>
@@ -104,6 +108,10 @@ export class QuizStateService {
 
   setCurrentHint(hint: HintResponse | null): void {
     this.currentHint.set(hint);
+  }
+  
+  setPlayMode(mode: PlayMode): void {
+      this.currentPlayMode.set(mode);
   }
 
   // Method to get the current quiz configuration for API requests

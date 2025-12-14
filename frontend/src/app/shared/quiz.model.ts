@@ -7,6 +7,8 @@ export interface GenerateQuizRequest {
   numberOfQuestions?: number;
 }
 
+export type PlayMode = 'SOLO' | 'HOST' | 'GUEST';
+
 export interface QuizResponse {
   question: string;
   options: string[];
