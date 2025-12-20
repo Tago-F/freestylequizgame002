@@ -180,6 +180,10 @@ export class QuizStateService {
         const sessionId = sessionResponse.sessionId;
         this.currentSessionId.set(sessionId);
         
+        // Host joins the session immediately to get a playerId
+        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon));
+        this.playerStateService.setMyPlayerId(player.id);
+
         this.connectToSession(sessionId);
 
         if (this.currentPlayMode() === 'SOLO') {
