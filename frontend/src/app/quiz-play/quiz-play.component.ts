@@ -190,6 +190,7 @@ export class QuizPlayComponent implements OnInit {
   showResult = false;
   isCorrect = false;
   correctAnswer = '';
+  private currentQuestionText = '';
 
   private apiService = inject(ApiService);
   public quizState = inject(QuizStateService);
@@ -202,17 +203,22 @@ export class QuizPlayComponent implements OnInit {
 
   constructor() {
     effect(() => {
-       // Reset state when new quiz arrives
-       if (this.quizState.quiz()) {
+       const quiz = this.quizState.quiz();
+       const remainingTime = this.quizState.remainingTime();
+
+       // 1. 新しい問題になった場合のみリセット
+       if (quiz && quiz.question !== this.currentQuestionText) {
+           this.currentQuestionText = quiz.question;
            this.hasUsedHint = false;
            this.hasSubmitted = false;
            this.showResult = false;
        }
-       
-       // Handle timer expiration
-       if (this.quizState.remainingTime() === 0 && !this.showResult) {
-           // Time up handling, maybe switch to result view if not already
-           // Ideally backend sends result or we just show timeout
+
+       // 2. タイムアップ検知
+       if (remainingTime === 0 && !this.showResult) {
+           this.showResult = true;
+           this.isCorrect = false;
+           this.correctAnswer = quiz?.correctAnswer || 'Time Up';
        }
     });
   }
