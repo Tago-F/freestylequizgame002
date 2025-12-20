@@ -231,14 +231,7 @@ export class QuizPlayComponent implements OnInit {
 
     // Subscribe to result updates
     this.quizState.answerResult$.subscribe(result => {
-        this.isCorrect = result.correct;
-        this.correctAnswer = result.correctAnswer;
-        this.showResult = true;
-        
-        // Update score in local state
-        // Note: Ideally backend broadcasts updated player list, which updates playerState automatically via WebSocket
-        // But we can also update locally for immediate feedback if needed, 
-        // though playerStateService.setPlayers() is called by WS updates in QuizStateService.
+        this.handleResult(result);
     });
   }
 
@@ -256,6 +249,11 @@ export class QuizPlayComponent implements OnInit {
     
     if (sessionId && playerId) {
         this.apiService.submitAnswer(sessionId, playerId, answer, this.hasUsedHint).subscribe({
+            next: (result) => {
+                this.isCorrect = result.correct;
+                this.correctAnswer = result.correctAnswer;
+                this.showResult = true;
+            },
             error: (err) => console.error("Submit answer failed", err)
         });
     }
@@ -276,5 +274,12 @@ export class QuizPlayComponent implements OnInit {
       } else {
           this.quizState.leaveGame();
       }
+  }
+
+  handleResult(result: any) {
+    console.log('Result received:', result);
+    this.isCorrect = result.correct;
+    this.correctAnswer = result.correctAnswer;
+    this.showResult = true;
   }
 }

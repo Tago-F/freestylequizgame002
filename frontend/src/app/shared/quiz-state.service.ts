@@ -167,6 +167,7 @@ export class QuizStateService {
     // Subscribe to answer results
     this.webSocketService.watch('/topic/room/' + sessionId + '/result').subscribe(message => {
       const result: AnswerResult = JSON.parse(message.body);
+      console.log('WebSocket Answer Result:', result); // Added debug log
       this.answerResult$.next(result);
     });
   }
