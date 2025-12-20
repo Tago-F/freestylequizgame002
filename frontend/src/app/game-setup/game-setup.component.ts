@@ -35,7 +35,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'; // Added
       </mat-card-header>
       <mat-card-content>
       
-        <div class="section">
+        <div class="section" *ngIf="quizState.playMode() !== 'SOLO'">
             <mat-form-field appearance="fill" class="full-width">
                 <mat-label>Room Name</mat-label>
                 <input matInput [(ngModel)]="roomName" placeholder="Enter room name">
@@ -132,6 +132,9 @@ export class GameSetupComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedTimeLimit = this.quizState.timeLimit();
+    if (this.quizState.playMode() === 'SOLO') {
+      this.roomName = 'Solo Play';
+    }
   }
 
   async createRoom(): Promise<void> {

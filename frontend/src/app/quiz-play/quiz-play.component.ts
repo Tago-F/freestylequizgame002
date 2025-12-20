@@ -197,7 +197,7 @@ export class QuizPlayComponent implements OnInit {
   private router = inject(Router);
 
   get isHost(): boolean {
-    return this.quizState.hostPlayerId() === this.playerState.myPlayerId();
+    return this.quizState.hostPlayerId() === this.playerState.myPlayerId() || this.quizState.playMode() === 'SOLO';
   }
 
   constructor() {

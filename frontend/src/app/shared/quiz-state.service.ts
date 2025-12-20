@@ -179,11 +179,14 @@ export class QuizStateService {
         const sessionId = sessionResponse.sessionId;
         this.currentSessionId.set(sessionId);
         
-        const player = await firstValueFrom(this.apiService.joinGameSession(sessionId, playerName, icon));
-        this.playerStateService.setMyPlayerId(player.id);
-        
         this.connectToSession(sessionId);
-        this.router.navigate(['/quiz/waiting-room']);
+
+        if (this.currentPlayMode() === 'SOLO') {
+          await firstValueFrom(this.apiService.startGame(sessionId));
+          this.router.navigate(['/quiz/play']);
+        } else {
+          this.router.navigate(['/quiz/waiting-room']);
+        }
     } catch (err: any) {
         this.error.set(err.message || 'Failed to host game');
         console.error('Host game error:', err);
